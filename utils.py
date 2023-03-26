@@ -201,6 +201,9 @@ def get_alliteration_by_phoneme(sentences):
                         phoneme_dict[phoneme] += 1
                 current_phonemes[i] = get_phonemes(word)[0]
                 i = 0 if i == 1 else 1
+    phonemes = list(phoneme_dict.keys())
+    num_occurences = list(phoneme_dict.values())
+    plt.bar(range(len(phoneme_dict)), num_occurences, tick_label=phonemes)
     return phoneme_dict
 
 
