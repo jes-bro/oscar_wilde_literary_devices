@@ -134,7 +134,7 @@ def count_alliteration_by_starting_letter(sentences):
                 first_letter_current_word = word[0]
                 first_letter_next_word = sentence[word_index+1]
                 if first_letter_current_word == first_letter_next_word:
-                    
+                    pass
 
 def word_uniqueness_against_all_books(first_book, all_books):
     pass
