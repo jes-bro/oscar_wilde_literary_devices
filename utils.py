@@ -6,7 +6,7 @@ import nltk
 alphabets = "([A-Za-z])"
 prefixes = "(Mr|St|Mrs|Ms|Dr)[.]"
 suffixes = "(Inc|Ltd|Jr|Sr|Co)"
-starters = "(Mr|Mrs|Ms|Dr|Prof|Capt|Cpt|Lt|He's|She's|It\s|They\s|Their\s|Our\s|We\s|But\s|However\s|That\s|This\s|Wherever)"
+starters = "(Mr|Mrs|Ms|Dr|Prof|Capt|Cpt|Lt|He's|She's|It's|They's|Their's|Ours|We's|But's|However's|That's|This's|Wherever)"
 acronyms = "([A-Z][.][A-Z][.](?:[A-Z][.])?)"
 websites = "[.](com|net|org|io|gov|edu|me)"
 digits = "([0-9])"
@@ -63,7 +63,7 @@ def plot_num_word_lengths_in_single_book(lowered):
     plt.show()
 
 
-def get_lowered_from_text(book_title):
+def get_lowered_from_txt(book_title):
     f_text = ""
     with open(f"{book_title}.txt", "r") as f:
         for line in f:
@@ -84,6 +84,7 @@ def get_sentences_from_txt(book_title):
     return sentences
 
 
+# Maybe figure out how to get rid of extra \
 def split_into_lowered_sentences(text):
     lowered = []
     for word in text:
@@ -141,16 +142,81 @@ def split_sentences_into_lists_of_words(sentences):
     return sentences
 
 
-def count_alliteration_by_starting_letter(sentences):
-    alliterations_by_first_letter = {}
-    split_sentences = split_sentences_into_lists_of_words(sentences)
-    for sentence in split_sentences:
-        for word_index, word in enumerate(sentence):
-            if word_index + 1 < len(sentence):
-                first_letter_current_word = word[0]
-                first_letter_next_word = sentence[word_index + 1]
-                if first_letter_current_word == first_letter_next_word:
-                    pass
+# nltk.download("cmudict")
+# nltk.download("stopwords")
+phoneme_dictionary = nltk.corpus.cmudict.dict()
+stress_symbols = [
+    "0",
+    "1",
+    "2",
+    "3...",
+    "-",
+    "!",
+    "+",
+    "/",
+    "#",
+    ":",
+    ":1",
+    ".",
+    ":2",
+    "?",
+    ":3",
+]
+# nltk.download('stopwords') ## download stopwords (the, a, of, ...)
+# nltk.download("cmudict")
+# nltk.corpus.reader.cmudict
+# Get stopwords that will be discarded in comparison
+stopwords = nltk.corpus.stopwords.words("english")
+# Function for removing all punctuation marks (. , ! * etc.)
+no_punct = lambda x: re.sub(r"[^\w\s]", "", x)
+
+
+def get_phonemes(word):
+    if word in phoneme_dictionary:
+        return phoneme_dictionary[word][0]  # return first entry by convention
+    else:
+        return ["NONE"]  # no entries found for input word
+
+
+def get_alliteration_score(sentences):
+    count, total_words = 0, 0
+    proximity = 4
+    i = 0
+    for sentence in sentences:
+        current_phonemes = [None] * proximity
+        for word in sentence:
+            word = no_punct(word)
+            total_words += 1
+            if word not in stopwords:
+                if get_phonemes(word)[0] in current_phonemes:
+                    count += 1
+                current_phonemes[i] = get_phonemes(word)[0]
+                i = 0 if i == 1 else 1
+
+    alliteration_score = count / total_words
+    return alliteration_score
+
+
+def get_alliteration_by_phoneme(sentences):
+    count, total_words = 0, 0
+    proximity = 4
+    i = 0
+    phoneme_dict = {}
+    for sentence in sentences:
+        current_phonemes = [None] * proximity
+        for word in sentence:
+            word = no_punct(word)
+            total_words += 1
+            if word not in stopwords:
+                phoneme = get_phonemes(word)[0]
+                if phoneme in current_phonemes:
+                    if phoneme not in phoneme_dict:
+                        phoneme_dict[phoneme] = 1
+                    else:
+                        phoneme_dict[phoneme] += 1
+                current_phonemes[i] = get_phonemes(word)[0]
+                i = 0 if i == 1 else 1
+    return phoneme_dict
 
 
 def word_uniqueness_against_all_books(first_book, all_books):
