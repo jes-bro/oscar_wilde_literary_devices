@@ -6,7 +6,7 @@ import nltk
 alphabets = "([A-Za-z])"
 prefixes = "(Mr|St|Mrs|Ms|Dr)[.]"
 suffixes = "(Inc|Ltd|Jr|Sr|Co)"
-starters = "(Mr|Mrs|Ms|Dr|Prof|Capt|Cpt|Lt|He\s|She\s|It\s|They\s|Their\s|Our\s|We\s|But\s|However\s|That\s|This\s|Wherever)"
+starters = "(Mr|Mrs|Ms|Dr|Prof|Capt|Cpt|Lt|He's|She's|It\s|They\s|Their\s|Our\s|We\s|But\s|However\s|That\s|This\s|Wherever)"
 acronyms = "([A-Z][.][A-Z][.](?:[A-Z][.])?)"
 websites = "[.](com|net|org|io|gov|edu|me)"
 digits = "([0-9])"
@@ -25,8 +25,23 @@ def get_data_from_book(url, book_title):
 
     with open(f"{book_title}.txt", "w") as f:
         for i in lowered:
-            f.write(f"{i} ")
+            f.write(f"{i}")
     return lowered
+
+
+def remove_extra_text(lowered):
+    new_lowered = lowered[lowered.index("chapter") : lowered.index("***end")]
+
+    common_words = []
+    with open("commons.csv", "r") as f:
+        for line in f:
+            common_words.append(line.strip("\n"))
+
+    for index, words in enumerate(common_words):
+        for _ in range(new_lowered.count(words)):
+            new_lowered.remove(words)
+
+    return new_lowered
 
 
 def plot_most_freq_words(lowered, num_data_pts):
@@ -48,9 +63,9 @@ def plot_num_word_lengths_in_single_book(lowered):
     plt.show()
 
 
-def get_lowered_from_csv(book_title):
+def get_lowered_from_text(book_title):
     f_text = ""
-    with open(f"{book_title}.csv", "r") as f:
+    with open(f"{book_title}.txt", "r") as f:
         for line in f:
             f_text += line
     words = re.findall("\w+", f_text)
@@ -60,9 +75,9 @@ def get_lowered_from_csv(book_title):
     return lowered
 
 
-def get_sentences_from_csv(book_title):
+def get_sentences_from_txt(book_title):
     f_text = ""
-    with open(f"{book_title}.csv", "r") as f:
+    with open(f"{book_title}.txt", "r") as f:
         for line in f:
             f_text += line
     sentences = split_into_lowered_sentences(f_text)
@@ -119,10 +134,12 @@ def split_into_lowered_sentences(text):
     sentences = [s.strip() for s in sentences]
     return sentences
 
+
 def split_sentences_into_lists_of_words(sentences):
     for sentence_index, sentence in enumerate(sentences):
         sentences[sentence_index] = sentence.split(" ")
     return sentences
+
 
 def count_alliteration_by_starting_letter(sentences):
     alliterations_by_first_letter = {}
@@ -131,9 +148,10 @@ def count_alliteration_by_starting_letter(sentences):
         for word_index, word in enumerate(sentence):
             if word_index + 1 < len(sentence):
                 first_letter_current_word = word[0]
-                first_letter_next_word = sentence[word_index+1]
+                first_letter_next_word = sentence[word_index + 1]
                 if first_letter_current_word == first_letter_next_word:
-                    
+                    pass
+
 
 def word_uniqueness_against_all_books(first_book, all_books):
     pass
