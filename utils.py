@@ -274,18 +274,28 @@ def get_polarity_whole_text(text_file):
     )
 
 
-def get_polarity_character(text_file):
-    f_text = ""
-    with open(f"{text_file}.txt", "r") as f:
-        for line in f:
-            f_text += line
-    detector = Detector(f_text)
-    text = Text(f_text)
-    first_sentence = text.sentences[0]
-    first_entity = first_sentence.entities[0]
-    print(first_entity)
-    print(first_entity.positive_sentiment)
-    print(first_entity.negative_sentiment)
+def get_polarity_character(text_file, main_character):
+    sentences = get_sentences_from_txt(text_file)
+    main_character = main_character.lower()
+    sentences_with_main_present = []
+    for sentence in sentences:
+        if main_character in sentence:
+            sentences_with_main_present.append(sentence)
+    all_main_together = " ".join(sentences_with_main_present)
+    all_main_together = all_main_together.replace(".", " ")
+    all_main_together = all_main_together.replace("oscar", "")
+    all_main_together = all_main_together.replace("wilde", "")
+    all_main_together = all_main_together.replace("gutenberg", "")
+    all_main_together = all_main_together.replace("alfred", "")
+    all_main_together = all_main_together.replace("drake", "")
+    print(all_main_together)
+    text = Text(all_main_together)
+    one_sentence = text.sentences[0]
+    # print(one_sentence)
+    main_entity = one_sentence.entities[0]
+    print(main_entity)
+    print(main_entity.positive_sentiment)
+    print(main_entity.negative_sentiment)
 
 
 def get_sentiment_analysis_one_book():
