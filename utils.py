@@ -2,6 +2,10 @@ import requests
 import re
 import matplotlib.pyplot as plt
 import nltk
+import polyglot
+from polyglot.text import Text, Word
+from polyglot.downloader import downloader
+from polyglot.detect import Detector
 
 alphabets = "([A-Za-z])"
 prefixes = "(Mr|St|Mrs|Ms|Dr)[.]"
@@ -222,9 +226,76 @@ def get_alliteration_by_phoneme(sentences):
     return phoneme_dict
 
 
+def get_part_of_speech_usage_one_book(text_file):
+    # downloader.download("embeddings2.un")
+    # downloader.download("embeddings2.en")
+    f_text = ""
+    with open(f"{text_file}.txt", "r") as f:
+        for line in f:
+            f_text += line
+    detector = Detector(f_text)
+    text = Text(f_text)
+    print("{:<16}{}".format("Word", "POS Tag") + "\n" + "-" * 30)
+    for word, tag in text.pos_tags:
+        print("{:<16}{:>2}".format(word, tag))
+
+
+def get_polarity_whole_text(text_file):
+    f_text = ""
+    with open(f"{text_file}.txt", "r") as f:
+        for line in f:
+            f_text += line
+    detector = Detector(f_text)
+    text = Text(f_text)
+    print("{:<16}{}".format("Word", "Polarity") + "\n" + "-" * 30)
+    num_negative = 0
+    num_positive = 0
+    num_neutral = 0
+    for w in text.words:
+        if w.polarity == 1:
+            num_positive += 1
+        elif w.polarity == -1:
+            num_negative += 1
+        else:
+            num_neutral += 1
+        # print("{:<16}{:>2}".format(w, w.polarity))
+    print(
+        f"Num positive: {num_positive}, Num negative: {num_negative}, Num neutral: {num_neutral}"
+    )
+    labels = "Positive", "Negative", "Neutral"
+    sizes = [num_positive, num_negative, num_neutral]
+    plt.rcParams["text.color"] = "r"
+    fig, ax = plt.subplots()
+    ax.pie(
+        sizes,
+        labels=labels,
+        colors=["violet", "paleturquoise", "rosybrown"],
+        autopct="%1.1f%%",
+    )
+
+
+def get_polarity_character(text_file):
+    f_text = ""
+    with open(f"{text_file}.txt", "r") as f:
+        for line in f:
+            f_text += line
+    detector = Detector(f_text)
+    text = Text(f_text)
+    first_sentence = text.sentences[0]
+    first_entity = first_sentence.entities[0]
+    print(first_entity)
+    print(first_entity.positive_sentiment)
+    print(first_entity.negative_sentiment)
+
+
+def get_sentiment_analysis_one_book():
+    pass
+
+
 def word_uniqueness_against_all_books(first_book, all_books):
     pass
 
 
 def use_of_phallic_symbols(all_books):
     pass
+
