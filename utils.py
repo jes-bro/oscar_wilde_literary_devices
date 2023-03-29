@@ -1,11 +1,9 @@
 import re
 import itertools
-import requests
 import nltk
 from polyglot.text import Text
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
-import text_processing
 
 phoneme_dictionary = nltk.corpus.cmudict.dict()
 ALPHABETS = "([A-Za-z])"

@@ -1,42 +1,46 @@
-import math
-import utils
+"""
+Computes TF_IDF of text compared to a corpus.
+"""
 
-lord_arthur_saviles_crimes = utils.get_data_from_book(
+import math
+import text_processing
+
+lord_arthur_saviles_crimes = text_processing.get_data_from_book(
     "https://www.gutenberg.org/files/773/773-0.txt",
     "Lord Arthur Savile's Crime And Other Short Stories",
 )
-the_happy_prince = utils.get_data_from_book(
+the_happy_prince = text_processing.get_data_from_book(
     "https://www.gutenberg.org/cache/epub/902/pg902.txt",
     "The Happy Prince and Other Short Stories",
 )
-the_picture_of_dorian_grey = utils.get_data_from_book(
+the_picture_of_dorian_grey = text_processing.get_data_from_book(
     "https://www.gutenberg.org/cache/epub/174/pg174.txt", "The Picture of Dorian Grey"
 )
-salome = utils.get_data_from_book(
+salome = text_processing.get_data_from_book(
     "https://www.gutenberg.org/cache/epub/42704/pg42704.txt", "Salome"
 )
-a_house_of_pomegranates = utils.get_data_from_book(
+a_house_of_pomegranates = text_processing.get_data_from_book(
     "https://www.gutenberg.org/files/873/873-0.txt", "A House of Pomegranates"
 )
-the_ducchess_of_padua = utils.get_data_from_book(
+the_ducchess_of_padua = text_processing.get_data_from_book(
     "https://www.gutenberg.org/files/875/875-0.txt", "The Ducchess of Padua"
 )
-the_soul_of_man_under_socialism = utils.get_data_from_book(
+the_soul_of_man_under_socialism = text_processing.get_data_from_book(
     "https://www.gutenberg.org/files/1017/1017-0.txt", "The Soul of Man Under Socialism"
 )
-lady_windermeres_fan = utils.get_data_from_book(
+lady_windermeres_fan = text_processing.get_data_from_book(
     "https://www.gutenberg.org/files/790/790-0.txt", "Lady Windermeres Fan"
 )
-a_woman_of_no_importance = utils.get_data_from_book(
+a_woman_of_no_importance = text_processing.get_data_from_book(
     "https://www.gutenberg.org/files/854/854-0.txt", "A Woman of No Importance"
 )
-the_importance_of_being_earnest = utils.get_data_from_book(
+the_importance_of_being_earnest = text_processing.get_data_from_book(
     "https://www.gutenberg.org/files/844/844-0.txt", "The Importance of Being Earnest"
 )
-the_ballad_of_reading_gaol = utils.get_data_from_book(
+the_ballad_of_reading_gaol = text_processing.get_data_from_book(
     "https://www.gutenberg.org/cache/epub/301/pg301.txt", "The Ballad of Reading Gaol"
 )
-an_ideal_husband = utils.get_data_from_book(
+an_ideal_husband = text_processing.get_data_from_book(
     "https://www.gutenberg.org/files/885/885-0.txt", "An Ideal Husband"
 )
 
@@ -80,6 +84,18 @@ def compute_tf(novel):
 
 
 def compute_tf_idf(tf_dict, corpus):
+    """Computes TF-IDF of terms in one text compared to all texts
+    in a corpus.
+
+    Args:
+        tf_dict (dictionary): a dictionary of words mapping
+        corpus (list): a list of lists of words in different texts to
+        calculate inverse document frequency from
+
+    Returns:
+        tf_idf_dict: a dictionary of words appearing a text mapped to their
+        tf-idf value
+    """
     tf_idf_dict = {}
     for term, frequency in tf_dict:
         novel_occurences = 0
