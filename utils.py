@@ -6,6 +6,9 @@ import polyglot
 from polyglot.text import Text, Word
 from polyglot.downloader import downloader
 from polyglot.detect import Detector
+from PIL import Image
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
 
 alphabets = "([A-Za-z])"
 prefixes = "(Mr|St|Mrs|Ms|Dr)[.]"
@@ -182,47 +185,189 @@ def get_phonemes(word):
         return ["NONE"]  # no entries found for input word
 
 
-def get_alliteration_score(sentences):
+def get_alliteration_by_phoneme(sentences, book_title, sentence_num):
     count, total_words = 0, 0
-    proximity = 4
+    proximity = 2
     i = 0
-    for sentence in sentences:
-        current_phonemes = [None] * proximity
-        for word in sentence:
-            word = no_punct(word)
-            total_words += 1
-            if word not in stopwords:
-                if get_phonemes(word)[0] in current_phonemes:
-                    count += 1
-                current_phonemes[i] = get_phonemes(word)[0]
-                i = 0 if i == 1 else 1
-
-    alliteration_score = count / total_words
-    return alliteration_score
-
-
-def get_alliteration_by_phoneme(sentences):
-    count, total_words = 0, 0
-    proximity = 4
-    i = 0
+    sentences = split_sentences_into_lists_of_words(sentences)
+    # for sentence in sentences[0]:
+    phonemes_in_sentence = []
     phoneme_dict = {}
+    sentence = sentences[sentence_num]
+    word_dict = {}
+    pairs = []
+    common_words = [
+        "is",
+        "it",
+        "when",
+        "what",
+        "was",
+        "his",
+        "who",
+        "to",
+        "that",
+        "we",
+        "and",
+        "had",
+        "he",
+        "an",
+        "of",
+        "be",
+        "some",
+        "which",
+        "than",
+        "so",
+        "made",
+        "makes",
+        "how",
+        "with",
+        "me",
+        "one",
+        "about",
+        "can",
+        "have",
+        "or",
+        "not",
+        "then",
+        "upon",
+        "been",
+        "you",
+        "your",
+        "see",
+        "has",
+        "her",
+        "but",
+        "much",
+        "never",
+        "them",
+        "something",
+        "in",
+        "world",
+        "women",
+        "will",
+        "by",
+        "man",
+        "could",
+        "know",
+        "fell",
+        "make",
+        "such",
+        "long",
+        "through",
+        "certainly",
+        "knows",
+        "came",
+        "though",
+        "henry's",
+        "can't",
+        "work",
+        "as",
+        "an",
+        "anyone",
+        "anywhere",
+    ]
+    # print(sentence)
     for sentence in sentences:
-        current_phonemes = [None] * proximity
+        phonemes_in_sentence = []
         for word in sentence:
-            word = no_punct(word)
-            total_words += 1
-            if word not in stopwords:
-                phoneme = get_phonemes(word)[0]
-                if phoneme in current_phonemes:
-                    if phoneme not in phoneme_dict:
-                        phoneme_dict[phoneme] = 1
+            # print(f"{no_punct(word)}, {get_phonemes(word)[0]}")
+            # word = word.replace(word, get_phonemes(word)[0])
+            phonemes_in_sentence.append((get_phonemes(word)[0], word))
+            # print(word)
+        # print(phonemes_in_sentence)
+        for word_index in range(0, len(phonemes_in_sentence) - 2):
+            if (
+                phonemes_in_sentence[word_index][0]
+                == phonemes_in_sentence[word_index + 1][0]
+            ) and (
+                phonemes_in_sentence[word_index][1]
+                != phonemes_in_sentence[word_index + 1][1]
+            ):
+                if (
+                    not phonemes_in_sentence[word_index][0] == "NONE"
+                    and not phonemes_in_sentence[word_index][1] in common_words
+                ):
+                    if phonemes_in_sentence[word_index][0] not in phoneme_dict:
+                        print(
+                            f"word 1: {phonemes_in_sentence[word_index]}, word 2: {phonemes_in_sentence[word_index + 1]}"
+                        )
+                        phoneme_dict[phonemes_in_sentence[word_index][0]] = 1
+                        pairs.append(
+                            (
+                                f"({str(phonemes_in_sentence[word_index][1])}_{str(phonemes_in_sentence[word_index + 1][1])})"
+                            )
+                        )
                     else:
-                        phoneme_dict[phoneme] += 1
-                current_phonemes[i] = get_phonemes(word)[0]
-                i = 0 if i == 1 else 1
+                        print(
+                            f"word 1: {phonemes_in_sentence[word_index]}, word 2: {phonemes_in_sentence[word_index + 1]}"
+                        )
+                        phoneme_dict[phonemes_in_sentence[word_index][0]] += 1
+                if (
+                    (
+                        (not phonemes_in_sentence[word_index][0] == "NONE")
+                        and (not phonemes_in_sentence[word_index + 1][0] == "NONE")
+                    )
+                    and (not phonemes_in_sentence[word_index][1] in common_words)
+                    and (not phonemes_in_sentence[word_index + 1][1] in common_words)
+                ):
+                    if phonemes_in_sentence[word_index][1] not in word_dict:
+                        # print(
+                        #    f"word 1: {phonemes_in_sentence[word_index]}, word 2: {phonemes_in_sentence[word_index + 1]}"
+                        # )
+                        word_dict[phonemes_in_sentence[word_index][1]] = 1
+                    else:
+                        # print(
+                        #   f"word 1: {phonemes_in_sentence[word_index]}, word 2: {phonemes_in_sentence[word_index + 1]}"
+                        # )
+                        word_dict[phonemes_in_sentence[word_index][1]] += 1
+
+                # or phonemes_in_sentence[word_index][0]
+                # == phonemes_in_sentence[word_index + 2][0]
+                #   and phonemes_in_sentence[word_index][1]
+                #!= phonemes_in_sentence[word_index + 2][1]
+    # print(phoneme_dict)
+    if "NONE" in phoneme_dict:
+        del phoneme_dict["NONE"]
     phonemes = list(phoneme_dict.keys())
     num_occurences = list(phoneme_dict.values())
-    plt.bar(range(len(phoneme_dict)), num_occurences, tick_label=phonemes)
+    fig = plt.figure()
+    fig.tight_layout()
+    fig, (ax2, ax3) = plt.subplots(1, 2)
+    ax1 = fig.add_subplot(222)
+    ax2.title.set_text(f"Phoneme Usage in {book_title}")
+    ax1.title.set_text("Most Frequently Alliterated words")
+    ax3.title.set_text("Sample Alliterative Pairings")
+
+    fig.set_figheight(15)
+    fig.set_figwidth(20)
+    ax1.set_xlabel("Phoneme")
+    ax1.set_ylabel("Number of Occurences of Alliteration by Phoneme in All Sentences")
+    # spacing = 0.6
+    plt.xticks(fontsize=10)
+    # fig.subplots_adjust(top=spacing + 0.1)
+    # fig.subplots_adjust(bottom=spacing)
+    ax2.bar(range(len(phoneme_dict)), num_occurences, tick_label=phonemes)
+
+    # print(word_dict)
+    wc = WordCloud(
+        background_color="black",
+        width=1000,
+        height=1000,
+        max_words=10,
+        relative_scaling=0.5,
+        normalize_plurals=True,
+    ).generate_from_frequencies(word_dict)
+    ax1.imshow(wc)
+
+    wc = WordCloud(
+        background_color="black",
+        width=1000,
+        height=1000,
+        max_words=10,
+        relative_scaling=0.5,
+        normalize_plurals=True,
+    ).generate(str(pairs))
+    ax3.imshow(wc)
     return phoneme_dict
 
 
@@ -266,6 +411,7 @@ def get_polarity_whole_text(text_file):
     sizes = [num_positive, num_negative, num_neutral]
     plt.rcParams["text.color"] = "r"
     fig, ax = plt.subplots()
+    plt.title(f"{text_file.upper()}")
     ax.pie(
         sizes,
         labels=labels,
@@ -294,8 +440,16 @@ def get_polarity_character(text_file, main_character):
     # print(one_sentence)
     main_entity = one_sentence.entities[0]
     print(main_entity)
-    print(main_entity.positive_sentiment)
-    print(main_entity.negative_sentiment)
+    positive_score = main_entity.positive_sentiment
+    negative_score = main_entity.negative_sentiment
+    labels = "Positive", "Negative"
+    sizes = [positive_score, negative_score]
+    plt.rcParams["text.color"] = "r"
+    fig, ax = plt.subplots()
+    plt.title(f"{main_character.upper()}")
+    ax.pie(
+        sizes, labels=labels, colors=["violet", "paleturquoise"], autopct="%1.1f%%",
+    )
 
 
 def get_sentiment_analysis_one_book():
