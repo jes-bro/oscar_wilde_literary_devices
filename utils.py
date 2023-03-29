@@ -3,7 +3,6 @@ import re
 import matplotlib.pyplot as plt
 import nltk
 from polyglot.text import Text
-from polyglot.detect import Detector
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 import itertools
@@ -366,7 +365,6 @@ def get_part_of_speech_usage_one_book(text_file):
     with open(f"{text_file}.txt", "r") as f:
         for line in f:
             f_text += line
-    detector = Detector(f_text)
     text = Text(f_text)
     print("{:<16}{}".format("Word", "POS Tag") + "\n" + "-" * 30)
     for word, tag in text.pos_tags:
@@ -378,7 +376,6 @@ def get_polarity_whole_text(text_file):
     with open(f"{text_file}.txt", "r") as f:
         for line in f:
             f_text += line
-    detector = Detector(f_text)
     text = Text(f_text)
     print("{:<16}{}".format("Word", "Polarity") + "\n" + "-" * 30)
     num_negative = 0
