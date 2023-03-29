@@ -6,6 +6,7 @@ from polyglot.text import Text
 from polyglot.detect import Detector
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
+import itertools
 
 phoneme_dictionary = nltk.corpus.cmudict.dict()
 # nltk.download("cmudict")
@@ -138,8 +139,42 @@ def remove_extra_text(lowered, start_word):
     return new_lowered
 
 
-def plot_most_freq_words(lowered, num_data_pts):
-    f_dist = nltk.FreqDist(lowered)
+def plot_most_freq_words_texts():
+    num_data_pts = 30
+    word_dict = {}
+    for book in list_of_urls:
+        sentences = get_sentences_from_txt(book[1])
+        lowered_sentences = split_sentences_into_lists_of_words(sentences)
+        word_dict = {}
+        for sentence in lowered_sentences:
+            for word in sentence:
+                if word not in word_dict:
+                    word_dict[word] = 1
+                else:
+                    word_dict[word] += 1
+        sorted_dict = sorted(
+            word_dict.items()
+        )  # sorted by key, return a list of tuples
+        lists_most_freq = dict(itertools.islice(word_dict.items(), 20))
+        print(lists_most_freq)
+        words = list(lists_most_freq.keys())
+        freqs = list(lists_most_freq.values())
+        fig, ax = plt.subplots()
+        plt.bar(range(len(lists_most_freq)), freqs, tick_label=words)
+        fig.set_figheight(7)
+        fig.set_figwidth(20)
+        ax.set_title(book[1])
+        plt.xticks(fontsize=10)
+
+
+def plot_most_freq_words_all_texts_at_once():
+    num_data_pts = 30
+    sentences = []
+    lowered_sentences = []
+    for book in list_of_urls:
+        sentences = get_sentences_from_txt(book[1])
+        lowered_sentences.append(split_sentences_into_lists_of_words(sentences))
+    f_dist = nltk.FreqDist(lowered_sentences)
     f_dist.plot(num_data_pts)
 
 
@@ -276,6 +311,7 @@ def get_alliteration_by_phoneme(book_title):
                         word_dict[phonemes_in_sentence[word_index][1]] = 1
                     else:
                         word_dict[phonemes_in_sentence[word_index][1]] += 1
+    print(word_dict)
     if "NONE" in phoneme_dict:
         del phoneme_dict["NONE"]
     phonemes = list(phoneme_dict.keys())
