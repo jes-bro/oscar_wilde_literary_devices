@@ -2,13 +2,11 @@ import requests
 import re
 import matplotlib.pyplot as plt
 import nltk
-import polyglot
-from polyglot.text import Text, Word
-from polyglot.downloader import downloader
+from polyglot.text import Text
 from polyglot.detect import Detector
-from PIL import Image
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
+
 
 alphabets = "([A-Za-z])"
 prefixes = "(Mr|St|Mrs|Ms|Dr)[.]"
@@ -17,6 +15,15 @@ starters = "(Mr|Mrs|Ms|Dr|Prof|Capt|Cpt|Lt|He's|She's|It's|They's|Their's|Ours|W
 acronyms = "([A-Z][.][A-Z][.](?:[A-Z][.])?)"
 websites = "[.](com|net|org|io|gov|edu|me)"
 digits = "([0-9])"
+
+list_of_urls = [
+    ("https://www.gutenberg.org/files/885/885-0.txt", "ideal_husband"),
+    ("https://www.gutenberg.org/cache/epub/42704/pg42704.txt", "salome"),
+    ("https://www.gutenberg.org/files/844/844-0.txt", "importance_earnest"),
+    ("https://www.gutenberg.org/cache/epub/921/pg921.txt", "de_profundis"),
+    ("https://www.gutenberg.org/cache/epub/30120/pg30120.txt", "happy_prince"),
+    ("url", "pdg"),
+]
 
 
 def get_data_from_book(url, book_title):
@@ -34,6 +41,11 @@ def get_data_from_book(url, book_title):
         for i in lowered:
             f.write(f"{i}")
     return lowered
+
+
+def get_data_from_all_books():
+    for book in list_of_urls:
+        get_data_from_book(book[0], book[1])
 
 
 def remove_extra_text(lowered):
@@ -68,18 +80,6 @@ def plot_num_word_lengths_in_single_book(lowered):
     num_occurences = list(word_lengths.values())
     plt.bar(range(len(word_lengths)), num_occurences, tick_label=word_lens)
     plt.show()
-
-
-def get_lowered_from_txt(book_title):
-    f_text = ""
-    with open(f"{book_title}.txt", "r") as f:
-        for line in f:
-            f_text += line
-    words = re.findall("\w+", f_text)
-    lowered = []
-    for word in words:
-        lowered.append(word.lower())
-    return lowered
 
 
 def get_sentences_from_txt(book_title):
@@ -331,11 +331,11 @@ def get_alliteration_by_phoneme(sentences, book_title, sentence_num):
     phonemes = list(phoneme_dict.keys())
     num_occurences = list(phoneme_dict.values())
     fig = plt.figure()
-    fig.tight_layout()
-    fig, (ax2, ax3) = plt.subplots(1, 2)
-    ax1 = fig.add_subplot(222)
-    ax2.title.set_text(f"Phoneme Usage in {book_title}")
-    ax1.title.set_text("Most Frequently Alliterated words")
+    ax1 = fig.add_subplot(221)
+    ax2 = fig.add_subplot(222)
+    ax3 = fig.add_subplot(223)
+    ax1.title.set_text(f"Phoneme Usage in {book_title}")
+    ax2.title.set_text("Most Frequently Alliterated words")
     ax3.title.set_text("Sample Alliterative Pairings")
 
     fig.set_figheight(15)
@@ -346,7 +346,9 @@ def get_alliteration_by_phoneme(sentences, book_title, sentence_num):
     plt.xticks(fontsize=10)
     # fig.subplots_adjust(top=spacing + 0.1)
     # fig.subplots_adjust(bottom=spacing)
-    ax2.bar(range(len(phoneme_dict)), num_occurences, tick_label=phonemes)
+    ax1.bar(
+        range(len(phoneme_dict)), num_occurences, tick_label=phonemes, color="orange"
+    )
 
     # print(word_dict)
     wc = WordCloud(
@@ -357,7 +359,7 @@ def get_alliteration_by_phoneme(sentences, book_title, sentence_num):
         relative_scaling=0.5,
         normalize_plurals=True,
     ).generate_from_frequencies(word_dict)
-    ax1.imshow(wc)
+    ax2.imshow(wc)
 
     wc = WordCloud(
         background_color="black",
@@ -420,6 +422,38 @@ def get_polarity_whole_text(text_file):
     )
 
 
+def get_polarity_all_texts():
+    for book in list_of_urls:
+        get_polarity_whole_text(book[1])
+
+
+def get_avg_sentence_length_all_books():
+    sentence_lengths = {}
+    for book in list_of_urls:
+        sentences = get_sentences_from_txt(book[1])
+        total = 0
+        for sentence in sentences:
+            total += len(sentence)
+        num_sentences = len(sentences)
+        sentence_lengths[book[1]] = total / num_sentences
+    fig, ax = plt.subplots()
+    books = list(sentence_lengths.keys())
+    avg_sentence_lengths = list(sentence_lengths.values())
+    fig.set_figheight(10)
+    fig.set_figwidth(10)
+    ax.set_title("Average Sentence Length of Work Over Time")
+    ax.set_xlabel("Book Title")
+    ax.set_ylabel("Average Sentence Length")
+    # spacing = 0.6
+    plt.xticks(fontsize=10)
+    ax.bar(
+        range(len(sentence_lengths)),
+        avg_sentence_lengths,
+        tick_label=books,
+        color="orange",
+    )
+
+
 def get_polarity_character(text_file, main_character):
     sentences = get_sentences_from_txt(text_file)
     main_character = main_character.lower()
@@ -450,10 +484,6 @@ def get_polarity_character(text_file, main_character):
     ax.pie(
         sizes, labels=labels, colors=["violet", "paleturquoise"], autopct="%1.1f%%",
     )
-
-
-def get_sentiment_analysis_one_book():
-    pass
 
 
 def word_uniqueness_against_all_books(first_book, all_books):
