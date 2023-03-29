@@ -51,6 +51,10 @@ def get_data_from_all_books():
 def remove_extra_text(lowered):
     new_lowered = lowered[lowered.index("chapter") : lowered.index("***end")]
 
+
+def remove_extra_text(lowered, start_word):
+    new_lowered = lowered[lowered.index(start_word) : lowered.index("***end")]
+
     common_words = []
     with open("commons.csv", "r") as f:
         for line in f:
@@ -492,4 +496,3 @@ def word_uniqueness_against_all_books(first_book, all_books):
 
 def use_of_phallic_symbols(all_books):
     pass
-
