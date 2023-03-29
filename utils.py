@@ -7,7 +7,8 @@ from polyglot.detect import Detector
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 
-
+phoneme_dictionary = nltk.corpus.cmudict.dict()
+# nltk.download("cmudict")
 alphabets = "([A-Za-z])"
 prefixes = "(Mr|St|Mrs|Ms|Dr)[.]"
 suffixes = "(Inc|Ltd|Jr|Sr|Co)"
@@ -22,7 +23,77 @@ list_of_urls = [
     ("https://www.gutenberg.org/files/844/844-0.txt", "importance_earnest"),
     ("https://www.gutenberg.org/cache/epub/921/pg921.txt", "de_profundis"),
     ("https://www.gutenberg.org/cache/epub/30120/pg30120.txt", "happy_prince"),
-    ("url", "pdg"),
+]
+
+common_words = [
+    "is",
+    "it",
+    "when",
+    "what",
+    "was",
+    "his",
+    "who",
+    "to",
+    "that",
+    "we",
+    "and",
+    "had",
+    "he",
+    "an",
+    "of",
+    "be",
+    "some",
+    "which",
+    "than",
+    "so",
+    "made",
+    "makes",
+    "how",
+    "with",
+    "me",
+    "one",
+    "about",
+    "can",
+    "have",
+    "or",
+    "not",
+    "then",
+    "upon",
+    "been",
+    "you",
+    "your",
+    "see",
+    "has",
+    "her",
+    "but",
+    "much",
+    "never",
+    "them",
+    "something",
+    "in",
+    "world",
+    "women",
+    "will",
+    "by",
+    "man",
+    "could",
+    "know",
+    "fell",
+    "make",
+    "such",
+    "long",
+    "through",
+    "certainly",
+    "knows",
+    "came",
+    "though",
+    "henry's",
+    "can't",
+    "work",
+    "as",
+    "an",
+    "anyone",
+    "anywhere",
 ]
 
 
@@ -31,7 +102,7 @@ def get_data_from_book(url, book_title):
     response.encoding = "UTF-8"
     response_text = response.text
     response_words = response_text.replace("\ufeff", "")
-    words = response_words.split()
+    words = response_words.split(" ")
 
     lowered = []
     for word in words:
@@ -39,7 +110,7 @@ def get_data_from_book(url, book_title):
 
     with open(f"{book_title}.txt", "w") as f:
         for i in lowered:
-            f.write(f"{i}")
+            f.write(f"{i} ")
     return lowered
 
 
@@ -153,33 +224,9 @@ def split_sentences_into_lists_of_words(sentences):
     return sentences
 
 
-# nltk.download("cmudict")
-# nltk.download("stopwords")
-phoneme_dictionary = nltk.corpus.cmudict.dict()
-stress_symbols = [
-    "0",
-    "1",
-    "2",
-    "3...",
-    "-",
-    "!",
-    "+",
-    "/",
-    "#",
-    ":",
-    ":1",
-    ".",
-    ":2",
-    "?",
-    ":3",
-]
-# nltk.download('stopwords') ## download stopwords (the, a, of, ...)
-# nltk.download("cmudict")
-# nltk.corpus.reader.cmudict
-# Get stopwords that will be discarded in comparison
-stopwords = nltk.corpus.stopwords.words("english")
-# Function for removing all punctuation marks (. , ! * etc.)
-no_punct = lambda x: re.sub(r"[^\w\s]", "", x)
+def get_all_alliteration_by_phoneme():
+    for book in list_of_urls:
+        get_alliteration_by_phoneme(book[1])
 
 
 def get_phonemes(word):
@@ -189,96 +236,18 @@ def get_phonemes(word):
         return ["NONE"]  # no entries found for input word
 
 
-def get_alliteration_by_phoneme(sentences, book_title, sentence_num):
-    count, total_words = 0, 0
-    proximity = 2
-    i = 0
+def get_alliteration_by_phoneme(book_title):
+    sentences = get_sentences_from_txt(book_title)
     sentences = split_sentences_into_lists_of_words(sentences)
     # for sentence in sentences[0]:
     phonemes_in_sentence = []
     phoneme_dict = {}
-    sentence = sentences[sentence_num]
     word_dict = {}
     pairs = []
-    common_words = [
-        "is",
-        "it",
-        "when",
-        "what",
-        "was",
-        "his",
-        "who",
-        "to",
-        "that",
-        "we",
-        "and",
-        "had",
-        "he",
-        "an",
-        "of",
-        "be",
-        "some",
-        "which",
-        "than",
-        "so",
-        "made",
-        "makes",
-        "how",
-        "with",
-        "me",
-        "one",
-        "about",
-        "can",
-        "have",
-        "or",
-        "not",
-        "then",
-        "upon",
-        "been",
-        "you",
-        "your",
-        "see",
-        "has",
-        "her",
-        "but",
-        "much",
-        "never",
-        "them",
-        "something",
-        "in",
-        "world",
-        "women",
-        "will",
-        "by",
-        "man",
-        "could",
-        "know",
-        "fell",
-        "make",
-        "such",
-        "long",
-        "through",
-        "certainly",
-        "knows",
-        "came",
-        "though",
-        "henry's",
-        "can't",
-        "work",
-        "as",
-        "an",
-        "anyone",
-        "anywhere",
-    ]
-    # print(sentence)
     for sentence in sentences:
         phonemes_in_sentence = []
         for word in sentence:
-            # print(f"{no_punct(word)}, {get_phonemes(word)[0]}")
-            # word = word.replace(word, get_phonemes(word)[0])
             phonemes_in_sentence.append((get_phonemes(word)[0], word))
-            # print(word)
-        # print(phonemes_in_sentence)
         for word_index in range(0, len(phonemes_in_sentence) - 2):
             if (
                 phonemes_in_sentence[word_index][0]
@@ -288,13 +257,12 @@ def get_alliteration_by_phoneme(sentences, book_title, sentence_num):
                 != phonemes_in_sentence[word_index + 1][1]
             ):
                 if (
-                    not phonemes_in_sentence[word_index][0] == "NONE"
-                    and not phonemes_in_sentence[word_index][1] in common_words
+                    (not phonemes_in_sentence[word_index][0] == "NONE")
+                    and (not phonemes_in_sentence[word_index + 1][0] == "NONE")
+                    and (not phonemes_in_sentence[word_index][1] in common_words)
+                    and (not phonemes_in_sentence[word_index + 1][1] in common_words)
                 ):
                     if phonemes_in_sentence[word_index][0] not in phoneme_dict:
-                        print(
-                            f"word 1: {phonemes_in_sentence[word_index]}, word 2: {phonemes_in_sentence[word_index + 1]}"
-                        )
                         phoneme_dict[phonemes_in_sentence[word_index][0]] = 1
                         pairs.append(
                             (
@@ -302,34 +270,12 @@ def get_alliteration_by_phoneme(sentences, book_title, sentence_num):
                             )
                         )
                     else:
-                        print(
-                            f"word 1: {phonemes_in_sentence[word_index]}, word 2: {phonemes_in_sentence[word_index + 1]}"
-                        )
                         phoneme_dict[phonemes_in_sentence[word_index][0]] += 1
-                if (
-                    (
-                        (not phonemes_in_sentence[word_index][0] == "NONE")
-                        and (not phonemes_in_sentence[word_index + 1][0] == "NONE")
-                    )
-                    and (not phonemes_in_sentence[word_index][1] in common_words)
-                    and (not phonemes_in_sentence[word_index + 1][1] in common_words)
-                ):
+
                     if phonemes_in_sentence[word_index][1] not in word_dict:
-                        # print(
-                        #    f"word 1: {phonemes_in_sentence[word_index]}, word 2: {phonemes_in_sentence[word_index + 1]}"
-                        # )
                         word_dict[phonemes_in_sentence[word_index][1]] = 1
                     else:
-                        # print(
-                        #   f"word 1: {phonemes_in_sentence[word_index]}, word 2: {phonemes_in_sentence[word_index + 1]}"
-                        # )
                         word_dict[phonemes_in_sentence[word_index][1]] += 1
-
-                # or phonemes_in_sentence[word_index][0]
-                # == phonemes_in_sentence[word_index + 2][0]
-                #   and phonemes_in_sentence[word_index][1]
-                #!= phonemes_in_sentence[word_index + 2][1]
-    # print(phoneme_dict)
     if "NONE" in phoneme_dict:
         del phoneme_dict["NONE"]
     phonemes = list(phoneme_dict.keys())
@@ -355,6 +301,7 @@ def get_alliteration_by_phoneme(sentences, book_title, sentence_num):
     )
 
     # print(word_dict)
+    """
     wc = WordCloud(
         background_color="black",
         width=1000,
@@ -374,6 +321,7 @@ def get_alliteration_by_phoneme(sentences, book_title, sentence_num):
         normalize_plurals=True,
     ).generate(str(pairs))
     ax3.imshow(wc)
+    """
     return phoneme_dict
 
 
