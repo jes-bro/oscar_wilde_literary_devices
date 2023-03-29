@@ -1,7 +1,5 @@
-import pandas as pd
-import numpy as np
 import utils
-
+import math
 
 lord_arthur_saviles_crimes = utils.get_data_from_book(
     "https://www.gutenberg.org/files/773/773-0.txt",
@@ -42,7 +40,7 @@ an_ideal_husband = utils.get_data_from_book(
     "https://www.gutenberg.org/files/885/885-0.txt", "An Ideal Husband"
 )
 
-corpus = [
+oscar_wilde_corpus = [
     lord_arthur_saviles_crimes,
     the_happy_prince,
     the_picture_of_dorian_grey,
@@ -57,4 +55,26 @@ corpus = [
     an_ideal_husband,
 ]
 
-def compute_tf_idf_ow_corpus 
+
+def compute_tf(novel):
+    tf_dict = {}
+    num_words = 0
+    for word in novel:
+        if word in tf_dict:
+            tf_dict[word] += 1
+        else:
+            tf_dict[word] = 1
+            num_words += 1
+    for term, occurences in tf_dict.items():
+        tf_dict[term] = occurences / num_words
+    return tf_dict
+
+
+def compute_tf_idf(tf_dict, corpus):
+    tf_idf_dict = {}
+    for term, tf in tf_dict:
+        novel_occurences = 0
+        for novel in corpus:
+            if term in novel:
+                novel_occurences += 1
+        tf_idf_dict[term] = tf * math.log10
