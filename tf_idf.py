@@ -1,5 +1,5 @@
-import utils
 import math
+import utils
 
 lord_arthur_saviles_crimes = utils.get_data_from_book(
     "https://www.gutenberg.org/files/773/773-0.txt",
@@ -57,6 +57,15 @@ oscar_wilde_corpus = [
 
 
 def compute_tf(novel):
+    """Computes term frequency of all terms in a text.
+
+    Args:
+        novel (list): A list of words in the novel, each as a string.
+
+    Returns:
+        tf_dict (dictionary): A dictionary where keys are all words appearing
+        in the novel and values are number of occurences in novel.
+    """
     tf_dict = {}
     num_words = 0
     for word in novel:
@@ -72,9 +81,10 @@ def compute_tf(novel):
 
 def compute_tf_idf(tf_dict, corpus):
     tf_idf_dict = {}
-    for term, tf in tf_dict:
+    for term, frequency in tf_dict:
         novel_occurences = 0
         for novel in corpus:
             if term in novel:
                 novel_occurences += 1
-        tf_idf_dict[term] = tf * math.log10
+        tf_idf_dict[term] = frequency * math.log10(len(corpus) / novel_occurences)
+    return tf_idf_dict
