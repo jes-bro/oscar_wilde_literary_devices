@@ -2,14 +2,14 @@ import requests
 import re
 import matplotlib.pyplot as plt
 import nltk
-import polyglot
-from polyglot.text import Text, Word
-from polyglot.downloader import downloader
+from polyglot.text import Text
 from polyglot.detect import Detector
-from PIL import Image
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
+import itertools
 
+phoneme_dictionary = nltk.corpus.cmudict.dict()
+# nltk.download("cmudict")
 alphabets = "([A-Za-z])"
 prefixes = "(Mr|St|Mrs|Ms|Dr)[.]"
 suffixes = "(Inc|Ltd|Jr|Sr|Co)"
@@ -18,13 +18,92 @@ acronyms = "([A-Z][.][A-Z][.](?:[A-Z][.])?)"
 websites = "[.](com|net|org|io|gov|edu|me)"
 digits = "([0-9])"
 
+list_of_urls = [
+    ("https://www.gutenberg.org/files/885/885-0.txt", "ideal_husband"),
+    ("https://www.gutenberg.org/cache/epub/42704/pg42704.txt", "salome"),
+    ("https://www.gutenberg.org/files/844/844-0.txt", "importance_earnest"),
+    ("https://www.gutenberg.org/cache/epub/921/pg921.txt", "de_profundis"),
+    ("https://www.gutenberg.org/cache/epub/30120/pg30120.txt", "happy_prince"),
+]
+
+common_words = [
+    "is",
+    "it",
+    "when",
+    "what",
+    "was",
+    "his",
+    "who",
+    "to",
+    "that",
+    "we",
+    "and",
+    "had",
+    "he",
+    "an",
+    "of",
+    "be",
+    "some",
+    "which",
+    "than",
+    "so",
+    "made",
+    "makes",
+    "how",
+    "with",
+    "me",
+    "one",
+    "about",
+    "can",
+    "have",
+    "or",
+    "not",
+    "then",
+    "upon",
+    "been",
+    "you",
+    "your",
+    "see",
+    "has",
+    "her",
+    "but",
+    "much",
+    "never",
+    "them",
+    "something",
+    "in",
+    "world",
+    "women",
+    "will",
+    "by",
+    "man",
+    "could",
+    "know",
+    "fell",
+    "make",
+    "such",
+    "long",
+    "through",
+    "certainly",
+    "knows",
+    "came",
+    "though",
+    "henry's",
+    "can't",
+    "work",
+    "as",
+    "an",
+    "anyone",
+    "anywhere",
+]
+
 
 def get_data_from_book(url, book_title):
     response = requests.get(url)
     response.encoding = "UTF-8"
     response_text = response.text
     response_words = response_text.replace("\ufeff", "")
-    words = response_words.split()
+    words = response_words.split(" ")
 
     lowered = []
     for word in words:
@@ -32,8 +111,17 @@ def get_data_from_book(url, book_title):
 
     with open(f"{book_title}.txt", "w") as f:
         for i in lowered:
-            f.write(f"{i}")
+            f.write(f"{i} ")
     return lowered
+
+
+def get_data_from_all_books():
+    for book in list_of_urls:
+        get_data_from_book(book[0], book[1])
+
+
+def remove_extra_text(lowered):
+    new_lowered = lowered[lowered.index("chapter") : lowered.index("***end")]
 
 
 def remove_extra_text(lowered, start_word):
@@ -48,8 +136,42 @@ def remove_extra_text(lowered, start_word):
     return new_lowered
 
 
-def plot_most_freq_words(lowered, num_data_pts):
-    f_dist = nltk.FreqDist(lowered)
+def plot_most_freq_words_texts():
+    num_data_pts = 30
+    word_dict = {}
+    for book in list_of_urls:
+        sentences = get_sentences_from_txt(book[1])
+        lowered_sentences = split_sentences_into_lists_of_words(sentences)
+        word_dict = {}
+        for sentence in lowered_sentences:
+            for word in sentence:
+                if word not in word_dict:
+                    word_dict[word] = 1
+                else:
+                    word_dict[word] += 1
+        sorted_dict = sorted(
+            word_dict.items()
+        )  # sorted by key, return a list of tuples
+        lists_most_freq = dict(itertools.islice(word_dict.items(), 20))
+        print(lists_most_freq)
+        words = list(lists_most_freq.keys())
+        freqs = list(lists_most_freq.values())
+        fig, ax = plt.subplots()
+        plt.bar(range(len(lists_most_freq)), freqs, tick_label=words)
+        fig.set_figheight(7)
+        fig.set_figwidth(20)
+        ax.set_title(book[1])
+        plt.xticks(fontsize=10)
+
+
+def plot_most_freq_words_all_texts_at_once():
+    num_data_pts = 30
+    sentences = []
+    lowered_sentences = []
+    for book in list_of_urls:
+        sentences = get_sentences_from_txt(book[1])
+        lowered_sentences.append(split_sentences_into_lists_of_words(sentences))
+    f_dist = nltk.FreqDist(lowered_sentences)
     f_dist.plot(num_data_pts)
 
 
@@ -65,18 +187,6 @@ def plot_num_word_lengths_in_single_book(lowered):
     num_occurences = list(word_lengths.values())
     plt.bar(range(len(word_lengths)), num_occurences, tick_label=word_lens)
     plt.show()
-
-
-def get_lowered_from_txt(book_title):
-    f_text = ""
-    with open(f"{book_title}.txt", "r") as f:
-        for line in f:
-            f_text += line
-    words = re.findall("\w+", f_text)
-    lowered = []
-    for word in words:
-        lowered.append(word.lower())
-    return lowered
 
 
 def get_sentences_from_txt(book_title):
@@ -146,33 +256,9 @@ def split_sentences_into_lists_of_words(sentences):
     return sentences
 
 
-# nltk.download("cmudict")
-# nltk.download("stopwords")
-phoneme_dictionary = nltk.corpus.cmudict.dict()
-stress_symbols = [
-    "0",
-    "1",
-    "2",
-    "3...",
-    "-",
-    "!",
-    "+",
-    "/",
-    "#",
-    ":",
-    ":1",
-    ".",
-    ":2",
-    "?",
-    ":3",
-]
-# nltk.download('stopwords') ## download stopwords (the, a, of, ...)
-# nltk.download("cmudict")
-# nltk.corpus.reader.cmudict
-# Get stopwords that will be discarded in comparison
-stopwords = nltk.corpus.stopwords.words("english")
-# Function for removing all punctuation marks (. , ! * etc.)
-no_punct = lambda x: re.sub(r"[^\w\s]", "", x)
+def get_all_alliteration_by_phoneme():
+    for book in list_of_urls:
+        get_alliteration_by_phoneme(book[1])
 
 
 def get_phonemes(word):
@@ -182,96 +268,18 @@ def get_phonemes(word):
         return ["NONE"]  # no entries found for input word
 
 
-def get_alliteration_by_phoneme(sentences, book_title, sentence_num):
-    count, total_words = 0, 0
-    proximity = 2
-    i = 0
+def get_alliteration_by_phoneme(book_title):
+    sentences = get_sentences_from_txt(book_title)
     sentences = split_sentences_into_lists_of_words(sentences)
     # for sentence in sentences[0]:
     phonemes_in_sentence = []
     phoneme_dict = {}
-    sentence = sentences[sentence_num]
     word_dict = {}
     pairs = []
-    common_words = [
-        "is",
-        "it",
-        "when",
-        "what",
-        "was",
-        "his",
-        "who",
-        "to",
-        "that",
-        "we",
-        "and",
-        "had",
-        "he",
-        "an",
-        "of",
-        "be",
-        "some",
-        "which",
-        "than",
-        "so",
-        "made",
-        "makes",
-        "how",
-        "with",
-        "me",
-        "one",
-        "about",
-        "can",
-        "have",
-        "or",
-        "not",
-        "then",
-        "upon",
-        "been",
-        "you",
-        "your",
-        "see",
-        "has",
-        "her",
-        "but",
-        "much",
-        "never",
-        "them",
-        "something",
-        "in",
-        "world",
-        "women",
-        "will",
-        "by",
-        "man",
-        "could",
-        "know",
-        "fell",
-        "make",
-        "such",
-        "long",
-        "through",
-        "certainly",
-        "knows",
-        "came",
-        "though",
-        "henry's",
-        "can't",
-        "work",
-        "as",
-        "an",
-        "anyone",
-        "anywhere",
-    ]
-    # print(sentence)
     for sentence in sentences:
         phonemes_in_sentence = []
         for word in sentence:
-            # print(f"{no_punct(word)}, {get_phonemes(word)[0]}")
-            # word = word.replace(word, get_phonemes(word)[0])
             phonemes_in_sentence.append((get_phonemes(word)[0], word))
-            # print(word)
-        # print(phonemes_in_sentence)
         for word_index in range(0, len(phonemes_in_sentence) - 2):
             if (
                 phonemes_in_sentence[word_index][0]
@@ -281,13 +289,12 @@ def get_alliteration_by_phoneme(sentences, book_title, sentence_num):
                 != phonemes_in_sentence[word_index + 1][1]
             ):
                 if (
-                    not phonemes_in_sentence[word_index][0] == "NONE"
-                    and not phonemes_in_sentence[word_index][1] in common_words
+                    (not phonemes_in_sentence[word_index][0] == "NONE")
+                    and (not phonemes_in_sentence[word_index + 1][0] == "NONE")
+                    and (not phonemes_in_sentence[word_index][1] in common_words)
+                    and (not phonemes_in_sentence[word_index + 1][1] in common_words)
                 ):
                     if phonemes_in_sentence[word_index][0] not in phoneme_dict:
-                        print(
-                            f"word 1: {phonemes_in_sentence[word_index]}, word 2: {phonemes_in_sentence[word_index + 1]}"
-                        )
                         phoneme_dict[phonemes_in_sentence[word_index][0]] = 1
                         pairs.append(
                             (
@@ -295,44 +302,23 @@ def get_alliteration_by_phoneme(sentences, book_title, sentence_num):
                             )
                         )
                     else:
-                        print(
-                            f"word 1: {phonemes_in_sentence[word_index]}, word 2: {phonemes_in_sentence[word_index + 1]}"
-                        )
                         phoneme_dict[phonemes_in_sentence[word_index][0]] += 1
-                if (
-                    (
-                        (not phonemes_in_sentence[word_index][0] == "NONE")
-                        and (not phonemes_in_sentence[word_index + 1][0] == "NONE")
-                    )
-                    and (not phonemes_in_sentence[word_index][1] in common_words)
-                    and (not phonemes_in_sentence[word_index + 1][1] in common_words)
-                ):
+
                     if phonemes_in_sentence[word_index][1] not in word_dict:
-                        # print(
-                        #    f"word 1: {phonemes_in_sentence[word_index]}, word 2: {phonemes_in_sentence[word_index + 1]}"
-                        # )
                         word_dict[phonemes_in_sentence[word_index][1]] = 1
                     else:
-                        # print(
-                        #   f"word 1: {phonemes_in_sentence[word_index]}, word 2: {phonemes_in_sentence[word_index + 1]}"
-                        # )
                         word_dict[phonemes_in_sentence[word_index][1]] += 1
-
-                # or phonemes_in_sentence[word_index][0]
-                # == phonemes_in_sentence[word_index + 2][0]
-                #   and phonemes_in_sentence[word_index][1]
-                #!= phonemes_in_sentence[word_index + 2][1]
-    # print(phoneme_dict)
+    print(word_dict)
     if "NONE" in phoneme_dict:
         del phoneme_dict["NONE"]
     phonemes = list(phoneme_dict.keys())
     num_occurences = list(phoneme_dict.values())
     fig = plt.figure()
-    fig.tight_layout()
-    fig, (ax2, ax3) = plt.subplots(1, 2)
-    ax1 = fig.add_subplot(222)
-    ax2.title.set_text(f"Phoneme Usage in {book_title}")
-    ax1.title.set_text("Most Frequently Alliterated words")
+    ax1 = fig.add_subplot(221)
+    ax2 = fig.add_subplot(222)
+    ax3 = fig.add_subplot(223)
+    ax1.title.set_text(f"Phoneme Usage in {book_title}")
+    ax2.title.set_text("Most Frequently Alliterated words")
     ax3.title.set_text("Sample Alliterative Pairings")
 
     fig.set_figheight(15)
@@ -343,7 +329,9 @@ def get_alliteration_by_phoneme(sentences, book_title, sentence_num):
     plt.xticks(fontsize=10)
     # fig.subplots_adjust(top=spacing + 0.1)
     # fig.subplots_adjust(bottom=spacing)
-    ax2.bar(range(len(phoneme_dict)), num_occurences, tick_label=phonemes)
+    ax1.bar(
+        range(len(phoneme_dict)), num_occurences, tick_label=phonemes, color="orange"
+    )
 
     # print(word_dict)
     wc = WordCloud(
@@ -354,7 +342,7 @@ def get_alliteration_by_phoneme(sentences, book_title, sentence_num):
         relative_scaling=0.5,
         normalize_plurals=True,
     ).generate_from_frequencies(word_dict)
-    ax1.imshow(wc)
+    ax2.imshow(wc)
 
     wc = WordCloud(
         background_color="black",
@@ -417,6 +405,38 @@ def get_polarity_whole_text(text_file):
     )
 
 
+def get_polarity_all_texts():
+    for book in list_of_urls:
+        get_polarity_whole_text(book[1])
+
+
+def get_avg_sentence_length_all_books():
+    sentence_lengths = {}
+    for book in list_of_urls:
+        sentences = get_sentences_from_txt(book[1])
+        total = 0
+        for sentence in sentences:
+            total += len(sentence)
+        num_sentences = len(sentences)
+        sentence_lengths[book[1]] = total / num_sentences
+    fig, ax = plt.subplots()
+    books = list(sentence_lengths.keys())
+    avg_sentence_lengths = list(sentence_lengths.values())
+    fig.set_figheight(10)
+    fig.set_figwidth(10)
+    ax.set_title("Average Sentence Length of Work Over Time")
+    ax.set_xlabel("Book Title")
+    ax.set_ylabel("Average Sentence Length")
+    # spacing = 0.6
+    plt.xticks(fontsize=10)
+    ax.bar(
+        range(len(sentence_lengths)),
+        avg_sentence_lengths,
+        tick_label=books,
+        color="orange",
+    )
+
+
 def get_polarity_character(text_file, main_character):
     sentences = get_sentences_from_txt(text_file)
     main_character = main_character.lower()
@@ -450,10 +470,6 @@ def get_polarity_character(text_file, main_character):
         colors=["violet", "paleturquoise"],
         autopct="%1.1f%%",
     )
-
-
-def get_sentiment_analysis_one_book():
-    pass
 
 
 def word_uniqueness_against_all_books(first_book, all_books):
