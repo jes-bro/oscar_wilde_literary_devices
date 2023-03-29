@@ -5,8 +5,9 @@ import requests
 
 
 def get_data_from_book(url, book_title):
-    """Retrieves text of a Project Gutenberg txt file. Creates list of words
-    and stores data in a .txt file.
+    """
+    Retrieve the text of a Project Gutenberg txt file.
+    Create a list of words and stores data in a txt file.
 
     Args:
         url (string): url of a Project Gutenburg txt file.
@@ -32,7 +33,8 @@ def get_data_from_book(url, book_title):
 
 
 def remove_extra_text(lowered, start_word):
-    """Removes extra words from a list of words, including project gutenberg
+    """
+    Remove extra words from a list of words, including project gutenberg
     starting and endings, and common words.
 
     Args:
@@ -56,7 +58,8 @@ def remove_extra_text(lowered, start_word):
 
 
 def remove_punctuation(new_lowered):
-    """Removes punctuation marks from a list of words.
+    """
+    Remove punctuation marks from a list of words.
 
     Args:
         new_lowered (list): List of words from a given text.
@@ -79,7 +82,8 @@ def remove_punctuation(new_lowered):
 
 
 def remove_titles(new_lowered):
-    """Removes titles from list of words.
+    """
+    Remove titles from list of words.
 
     Args:
         new_lowered (list): List of lowercase words with no punctuation marks.
@@ -101,7 +105,8 @@ def remove_titles(new_lowered):
 
 
 def remove_character_names(new_lowered, characters_in_novel):
-    """Removes character names from a list of words.
+    """
+    Remove character names from a list of words.
 
     Args:
         new_lowered (list): list of lowercase words.

@@ -93,6 +93,20 @@ common_words = [
     "anywhere",
 ]
 
+"""
+Plot the most frequent words appearing in a text in a plot,
+for all texts in the corpus.
+
+For each text in the corpus, generate a dictionary of the
+20 most common words in the text and the number of times
+they appear. Generate a bar graph for each text. 
+
+Returns:
+    lists_most_freq: a dictionary where the keys are the 20
+    most frequently used words in the book and the values
+    are the number of times they appeared in the text.
+"""
+
 
 def plot_most_freq_words_texts():
     word_dict = {}
@@ -106,8 +120,8 @@ def plot_most_freq_words_texts():
                     word_dict[word] = 1
                 else:
                     word_dict[word] += 1
+        sorted(word_dict, key=word_dict.get, reverse=True)
         lists_most_freq = dict(itertools.islice(word_dict.items(), 20))
-        print(lists_most_freq)
         words = list(lists_most_freq.keys())
         freqs = list(lists_most_freq.values())
         fig, ax = plt.subplots()
@@ -116,17 +130,7 @@ def plot_most_freq_words_texts():
         fig.set_figwidth(20)
         ax.set_title(book[1])
         plt.xticks(fontsize=10)
-
-
-def plot_most_freq_words_all_texts_at_once():
-    num_data_pts = 30
-    sentences = []
-    lowered_sentences = []
-    for book in list_of_urls:
-        sentences = get_sentences_from_txt(book[1])
-        lowered_sentences.append(split_sentences_into_lists_of_words(sentences))
-    f_dist = nltk.FreqDist(lowered_sentences)
-    f_dist.plot(num_data_pts)
+    return lists_most_freq
 
 
 # Maybe he was trying to show off
@@ -415,10 +419,7 @@ def get_polarity_character(text_file, main_character):
     fig, ax = plt.subplots()
     plt.title(f"{main_character.upper()}")
     ax.pie(
-        sizes,
-        labels=labels,
-        colors=["violet", "paleturquoise"],
-        autopct="%1.1f%%",
+        sizes, labels=labels, colors=["violet", "paleturquoise"], autopct="%1.1f%%",
     )
 
 
