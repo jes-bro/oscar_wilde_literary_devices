@@ -38,16 +38,13 @@ def get_data_from_book(url, book_title):
 
 def remove_extra_text(lowered, start_word):
     new_lowered = lowered[lowered.index(start_word) : lowered.index("***end")]
-
     common_words = []
     with open("commons.csv", "r") as f:
         for line in f:
             common_words.append(line.strip("\n"))
-
     for index, words in enumerate(common_words):
         for _ in range(new_lowered.count(words)):
             new_lowered.remove(words)
-
     return new_lowered
 
 
@@ -448,7 +445,10 @@ def get_polarity_character(text_file, main_character):
     fig, ax = plt.subplots()
     plt.title(f"{main_character.upper()}")
     ax.pie(
-        sizes, labels=labels, colors=["violet", "paleturquoise"], autopct="%1.1f%%",
+        sizes,
+        labels=labels,
+        colors=["violet", "paleturquoise"],
+        autopct="%1.1f%%",
     )
 
 
