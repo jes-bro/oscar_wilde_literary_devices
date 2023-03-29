@@ -301,7 +301,6 @@ def get_alliteration_by_phoneme(book_title):
     )
 
     # print(word_dict)
-    """
     wc = WordCloud(
         background_color="black",
         width=1000,
@@ -321,7 +320,6 @@ def get_alliteration_by_phoneme(book_title):
         normalize_plurals=True,
     ).generate(str(pairs))
     ax3.imshow(wc)
-    """
     return phoneme_dict
 
 
