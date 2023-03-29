@@ -1,21 +1,18 @@
-import requests
 import re
-import matplotlib.pyplot as plt
+import itertools
 import nltk
 from polyglot.text import Text
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
-import itertools
 
 phoneme_dictionary = nltk.corpus.cmudict.dict()
-# nltk.download("cmudict")
-alphabets = "([A-Za-z])"
-prefixes = "(Mr|St|Mrs|Ms|Dr)[.]"
-suffixes = "(Inc|Ltd|Jr|Sr|Co)"
-starters = "(Mr|Mrs|Ms|Dr|Prof|Capt|Cpt|Lt|He's|She's|It's|They's|Their's|Ours|We's|But's|However's|That's|This's|Wherever)"
-acronyms = "([A-Z][.][A-Z][.](?:[A-Z][.])?)"
-websites = "[.](com|net|org|io|gov|edu|me)"
-digits = "([0-9])"
+ALPHABETS = "([A-Za-z])"
+PREFIXES = "(Mr|St|Mrs|Ms|Dr)[.]"
+SUFFIXES = "(Inc|Ltd|Jr|Sr|Co)"
+STARTERS = "(Mr|Mrs|Ms|Dr|Prof|Capt|Cpt|Lt|He's|She's|It's|They's|Their's|Ours|We's|But's|However's|That's|This's|Wherever)"
+ACRONYMS = "([A-Z][.][A-Z][.](?:[A-Z][.])?)"
+WEBSITES = "[.](com|net|org|io|gov|edu|me)"
+DIGITS = "([0-9])"
 
 list_of_urls = [
     ("https://www.gutenberg.org/files/885/885-0.txt", "ideal_husband"),
@@ -97,49 +94,7 @@ common_words = [
 ]
 
 
-def get_data_from_book(url, book_title):
-    response = requests.get(url)
-    response.encoding = "UTF-8"
-    response_text = response.text
-    response_words = response_text.replace("\ufeff", "")
-    words = response_words.split(" ")
-
-    lowered = []
-    for word in words:
-        lowered.append(word.lower())
-
-    with open(f"{book_title}.txt", "w") as f:
-        for i in lowered:
-            f.write(f"{i} ")
-    return lowered
-
-
-def get_data_from_all_books():
-    for book in list_of_urls:
-        get_data_from_book(book[0], book[1])
-
-
-def remove_extra_text(lowered):
-    new_lowered = lowered[lowered.index("chapter") : lowered.index("***end")]
-
-
-def remove_extra_text(lowered, start_word):
-    new_lowered = lowered[lowered.index(start_word) : lowered.index("***end")]
-
-    common_words = []
-    with open("commons.csv", "r") as f:
-        for line in f:
-            common_words.append(line.strip("\n"))
-
-    for index, words in enumerate(common_words):
-        for _ in range(new_lowered.count(words)):
-            new_lowered.remove(words)
-
-    return new_lowered
-
-
 def plot_most_freq_words_texts():
-    num_data_pts = 30
     word_dict = {}
     for book in list_of_urls:
         sentences = get_sentences_from_txt(book[1])
@@ -151,9 +106,6 @@ def plot_most_freq_words_texts():
                     word_dict[word] = 1
                 else:
                     word_dict[word] += 1
-        sorted_dict = sorted(
-            word_dict.items()
-        )  # sorted by key, return a list of tuples
         lists_most_freq = dict(itertools.islice(word_dict.items(), 20))
         print(lists_most_freq)
         words = list(lists_most_freq.keys())
@@ -208,9 +160,9 @@ def split_into_lowered_sentences(text):
     text = "".join(lowered)
     text = " " + text + "  "
     text = text.replace("\n", " ")
-    text = re.sub(prefixes, "\\1<prd>", text)
-    text = re.sub(websites, "<prd>\\1", text)
-    text = re.sub(digits + "[.]" + digits, "\\1<prd>\\2", text)
+    text = re.sub(PREFIXES, "\\1<prd>", text)
+    text = re.sub(WEBSITES, "<prd>\\1", text)
+    text = re.sub(DIGITS + "[.]" + DIGITS, "\\1<prd>\\2", text)
     if "..." in text:
         text = text.replace("...", "<prd><prd><prd>")
     if "www." in text:
@@ -223,17 +175,17 @@ def split_into_lowered_sentences(text):
         text = text.replace("Rev.", "Rev<prd>")
     if "D.D.:" in text:
         text = text.replace("D.D.:", "D<prd>D<prd>")
-    text = re.sub("\s" + alphabets + "[.] ", " \\1<prd> ", text)
-    text = re.sub(acronyms + " " + starters, "\\1<stop> \\2", text)
+    text = re.sub("\s" + ALPHABETS + "[.] ", " \\1<prd> ", text)
+    text = re.sub(ACRONYMS + " " + STARTERS, "\\1<stop> \\2", text)
     text = re.sub(
-        alphabets + "[.]" + alphabets + "[.]" + alphabets + "[.]",
+        ALPHABETS + "[.]" + ALPHABETS + "[.]" + ALPHABETS + "[.]",
         "\\1<prd>\\2<prd>\\3<prd>",
         text,
     )
-    text = re.sub(alphabets + "[.]" + alphabets + "[.]", "\\1<prd>\\2<prd>", text)
-    text = re.sub(" " + suffixes + "[.] " + starters, " \\1<stop> \\2", text)
-    text = re.sub(" " + suffixes + "[.]", " \\1<prd>", text)
-    text = re.sub(" " + alphabets + "[.]", " \\1<prd>", text)
+    text = re.sub(ALPHABETS + "[.]" + ALPHABETS + "[.]", "\\1<prd>\\2<prd>", text)
+    text = re.sub(" " + SUFFIXES + "[.] " + STARTERS, " \\1<stop> \\2", text)
+    text = re.sub(" " + SUFFIXES + "[.]", " \\1<prd>", text)
+    text = re.sub(" " + ALPHABETS + "[.]", " \\1<prd>", text)
     if "”" in text:
         text = text.replace(".”", "”.")
     if '"' in text:
@@ -359,8 +311,6 @@ def get_alliteration_by_phoneme(book_title):
 
 
 def get_part_of_speech_usage_one_book(text_file):
-    # downloader.download("embeddings2.un")
-    # downloader.download("embeddings2.en")
     f_text = ""
     with open(f"{text_file}.txt", "r") as f:
         for line in f:
@@ -465,12 +415,11 @@ def get_polarity_character(text_file, main_character):
     fig, ax = plt.subplots()
     plt.title(f"{main_character.upper()}")
     ax.pie(
-        sizes, labels=labels, colors=["violet", "paleturquoise"], autopct="%1.1f%%",
+        sizes,
+        labels=labels,
+        colors=["violet", "paleturquoise"],
+        autopct="%1.1f%%",
     )
-
-
-def word_uniqueness_against_all_books(first_book, all_books):
-    pass
 
 
 def use_of_phallic_symbols(all_books):
