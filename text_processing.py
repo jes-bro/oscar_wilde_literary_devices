@@ -17,10 +17,9 @@ def get_data_from_book(url, book_title):
         lowered: A list of words in book, written as strings in lowercase
     """
     response = requests.get(url, timeout=30)
-    response.encoding = "UTF-8"
     response_text = response.text
-    response_words = response_text.replace("\ufeff", "")
-    words = response_words.split(" ")
+    response.encoding = "UTF-8"
+    words = response_text.split(" ")
 
     lowered = []
     for word in words:
@@ -32,7 +31,37 @@ def get_data_from_book(url, book_title):
     return lowered
 
 
-def remove_extra_text(lowered, start_word):
+def remove_encoding_marks(lowered):
+    """Removes encoding marks containing \r\n from a list of strings."
+
+    Args:
+        lowered (list): list of words from a given text
+
+    Returns:
+        lowered: give list of words with encoding marks removed.
+    """
+    new_lowered = []
+    for word in lowered:
+        if word == "":
+            continue
+        elif "\r\n\r\n\r\n" in word:
+            two_words = word.split("\r\n\r\n\r\n")
+            new_lowered.append(two_words[0])
+            new_lowered.append(two_words[1])
+        elif "\r\n\r\n" in word:
+            two_words = word.split("\r\n\r\n")
+            new_lowered.append(two_words[0])
+            new_lowered.append(two_words[1])
+        elif "\r\n" in word:
+            two_words = word.split("\r\n")
+            new_lowered.append(two_words[0])
+            new_lowered.append(two_words[1])
+        else:
+            new_lowered.append(word)
+    return new_lowered[1:]
+
+
+def remove_extra_text(lowered, start_word, end_word):
     """
     Remove extra words from a list of words, including project gutenberg
     starting and endings, and common words.
@@ -46,7 +75,7 @@ def remove_extra_text(lowered, start_word):
         new_lowered: A list of words with common words and start/end
         text removed.
     """
-    new_lowered = lowered[lowered.index(start_word) : lowered.index("***end")]
+    new_lowered = lowered[lowered.index(start_word) : lowered.index(end_word)]
     commons = []
     with open("commons.csv", "r") as file:
         for line in file:
@@ -105,18 +134,18 @@ def remove_titles(new_lowered):
     return new_lowered
 
 
-def remove_character_names(new_lowered, characters_in_novel):
+def remove_character_names(new_lowered, character_tuple):
     """
     Remove character names from a list of words.
 
     Args:
         new_lowered (list): A list of lowercase words.
-        characters_in_novel (list): A list of characters in a given novel.
+        character_tuples (tuple)): A list of characters in a given novel.
 
     Returns:
         new_lowered: A list of words with given character names removed.
     """
-    for character in characters_in_novel:
+    for character in character_tuple:
         for _ in range(new_lowered.count(character)):
             new_lowered.remove(character)
     return new_lowered
