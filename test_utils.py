@@ -362,6 +362,12 @@ def test_files_dir():
             {"peter": 1, "piper": 1},
             ["(peter_piper)"],
         ),
+        # Test that repeated words don't return alliteration
+        ("test_txt1", {}, {}, [],),
+        # Test that 2 different repeated words don't return alliteration
+        ("test_txt1", {}, {}, [],),
+        # check that multiple alliterated sequences are accounted for
+        ("test_txt11", {"S": 1}, {"sells": 1}, ["(sells_sea)"]),
     ],
 )
 def test_get_alliteration_by_phoneme(
@@ -371,6 +377,25 @@ def test_get_alliteration_by_phoneme(
     expected_word_dict,
     expected_pairs,
 ):
+    """
+    Create two dictionaries that represent the number of alliterative
+    sequences with certain starting phonemes, the most frequently
+    alliterated words, and a list of sample word pairs for a given
+    text.
+
+    Args:
+        book_title: A string representing the title of a book. 
+
+    Returns:
+        phoneme_dict: A dict mapping phonemes (str) to the
+        number of times it was used (int) in an alliterative
+        sequence in a given text.
+        word_dict: A dictionary mapping words (str) to the
+        number of times they are used in alliterative
+        sequences (int)
+        pairs: A list of strings representing sample
+        alliterative pairs from a text
+    """
     filepath = os.path.join(test_files_dir, filename)
     phoneme_dict, word_dict, pairs = get_alliteration_by_phoneme(filepath)
     assert phoneme_dict == expected_phoneme_dict
