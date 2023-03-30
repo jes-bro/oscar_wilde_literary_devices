@@ -222,11 +222,14 @@ Returns:
 
 def split_into_lowered_sentences(text):
     lowered = []
-    for word in text:
-        lowered.append(word.lower())
+    for character in text:
+        lowered.append(character.lower())
+    print(lowered)
     text = "".join(lowered)
+    print(text)
     text = " " + text + "  "
     text = text.replace("\n", " ")
+    print(text)
     text = re.sub(PREFIXES, "\\1<prd>", text)
     text = re.sub(WEBSITES, "<prd>\\1", text)
     text = re.sub(DIGITS + "[.]" + DIGITS, "\\1<prd>\\2", text)
@@ -234,14 +237,16 @@ def split_into_lowered_sentences(text):
         text = text.replace("...", "<prd><prd><prd>")
     if "www." in text:
         text = text.replace("www.", "www<prd>")
-    if "Ph.D" in text:
-        text = text.replace("Ph.D.", "Ph<prd>D<prd>")
-    if "Hon." in text:
-        text = text.replace("Hon.", "Hon<prd>")
-    if "Rev." in text:
-        text = text.replace("Rev.", "Rev<prd>")
-    if "D.D.:" in text:
-        text = text.replace("D.D.:", "D<prd>D<prd>")
+    if "ph.d" in text:
+        text = text.replace("ph.d", "ph<prd>D<prd>")
+    if "hon." in text:
+        text = text.replace("hon.", "hon<prd>")
+    if "rev." in text:
+        text = text.replace("rev.", "rev<prd>")
+    if "d.d.:" in text:
+        text = text.replace("d.d.:", "d<prd>d<prd>")
+    if "dr." in text:
+        text = text.replace("dr.", "dr<prd>")
     text = re.sub("\s" + ALPHABETS + "[.] ", " \\1<prd> ", text)
     text = re.sub(ACRONYMS + " " + STARTERS, "\\1<stop> \\2", text)
     text = re.sub(
