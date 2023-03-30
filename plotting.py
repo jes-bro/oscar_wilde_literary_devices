@@ -5,10 +5,37 @@ A file to store plotting functions
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 
+"""
+Plot bar graph for all books.
+"""
+
 
 def plot_freq_bar(
     most_freq,
     title="Most Popular Words Across All Books",
+    ylabel="Number of Occurences Across Texts",
+    xlabel="Most Popular Words Across Texts",
+):
+    fig, ax = plt.subplots()
+    words = list(most_freq.keys())
+    frequencies = list(most_freq.values())
+    plt.bar(range(len(most_freq)), frequencies, tick_label=words)
+    fig.set_figheight(7)
+    fig.set_figwidth(20)
+    ax.set_title(title)
+    ax.set_ylabel(ylabel)
+    ax.set_xlabel(xlabel)
+    plt.xticks(fontsize=10)
+
+
+"""
+Plot bar graph for all books.
+"""
+
+
+def plot_freq_bar_one_book(
+    most_freq,
+    title,
     ylabel="Number of Occurences Across Texts",
     xlabel="Most Popular Words Across Texts",
 ):
