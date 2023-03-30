@@ -8,16 +8,17 @@ import re
 import itertools
 import nltk
 from polyglot.text import Text
-import matplotlib.pyplot as plt
-from wordcloud import WordCloud
+from plotting import plot_alliteration
 
 
 phoneme_dictionary = nltk.corpus.cmudict.dict()
 ALPHABETS = "([A-Za-z])"
 PREFIXES = "(Mr|St|Mrs|Ms|Dr)[.]"
 SUFFIXES = "(Inc|Ltd|Jr|Sr|Co)"
-STARTERS = "(Mr|Mrs|Ms|Dr|Prof|Capt|Cpt|Lt|He's|She's|It's|They' \
-|Their's|Ours|We's|But's|However's|That's|This's|Wherever)"
+STARTERS = (
+    "(Mr|Mrs|Ms|Dr|Prof|Capt|Cpt|Lt|He's|She's|It's|They'"
+    " |Their's|Ours|We's|But's|However's|That's|This's|Wherever)"
+)
 ACRONYMS = "([A-Z][.][A-Z][.](?:[A-Z][.])?)"
 WEBSITES = "[.](com|net|org|io|gov|edu|me)"
 DIGITS = "([0-9])"
@@ -29,6 +30,8 @@ list_of_urls = [
     ("https://www.gutenberg.org/cache/epub/921/pg921.txt", "de_profundis"),
     ("https://www.gutenberg.org/cache/epub/30120/pg30120.txt", "happy_prince"),
 ]
+
+list_of_test_urls = [("")]
 
 common_words = [
     "is",
@@ -156,8 +159,8 @@ Plot the most frequent words appearing in a text in a plot,
 for all texts in the corpus.
 
 For each text in the corpus, generate a dictionary of the
-20 most common words in the text and the number of times
-they appear. Generate a bar graph for each text.
+num_data_pts most common words in the text and the number of times
+they appear. 
 
 Args:
     list_of_urls: A list of tuples where the first parameter
@@ -165,43 +168,42 @@ Args:
     is the name (str) of the local text file on the machine.
     
     num_data_pts: An int representing the number of most
-    frequent words to plot on the bar graph.
+    frequent words to include in the most_freq dictionary
 
 Returns:
-    lists_most_freq: A dictionary where the keys are the 20
+    most_freq: A dictionary where the keys are the num_data_pts
     most frequently used words (strs) in the book and the values
-    are the number of times (ints) they appeared in the text.
+    are the number of times (ints) they appeared in the texts.
 """
 
 
 def plot_most_freq_words_texts(list_of_urls, num_data_pts):
     word_dict = {}
-    print(list_of_urls)
     for book in list_of_urls:
-        print(book)
         sentences = get_sentences_from_txt(book[1])
         lowered_sentences = split_sentences_into_lists_of_words(sentences)
-        word_dict = {}
         for sentence in lowered_sentences:
             for word in sentence:
+                if "." in word:
+                    word = word.replace(".", "")
+                if "?" in word:
+                    word = word.replace("?", "")
+                if "'" in word:
+                    word = word.replace("'", "")
+                word = word.lower()
                 if word not in word_dict:
                     word_dict[word] = 1
                 else:
                     word_dict[word] += 1
-        sorted(word_dict, key=word_dict.get, reverse=True)
-        lists_most_freq = dict(itertools.islice(word_dict.items(), num_data_pts))
-        words = list(lists_most_freq.keys())
-        freqs = list(lists_most_freq.values())
-    return lists_most_freq
+    sorted_dict = sorted(word_dict, key=word_dict.get, reverse=True)
+    sorted_keys = sorted(word_dict, key=word_dict.get, reverse=True)
+    values = []
+    for key in sorted_keys:
+        values.append(word_dict[key])
+    most_freq = dict(zip(sorted_keys, values))
+    most_freq = dict(itertools.islice(most_freq.items(), num_data_pts))
 
-
-def plot_freq_bar(lists_most_freq, words, freqs, book):
-    fig, ax = plt.subplots()
-    plt.bar(range(len(lists_most_freq)), freqs, tick_label=words)
-    fig.set_figheight(7)
-    fig.set_figwidth(20)
-    ax.set_title(book[1])
-    plt.xticks(fontsize=10)
+    return most_freq
 
 
 """
@@ -248,7 +250,9 @@ def split_into_lowered_sentences(text):
         "\\1<prd>\\2<prd>\\3<prd>",
         text,
     )
-    text = re.sub(ALPHABETS + "[.]" + ALPHABETS + "[.]", "\\1<prd>\\2<prd>", text)
+    text = re.sub(
+        ALPHABETS + "[.]" + ALPHABETS + "[.]", "\\1<prd>\\2<prd>", text
+    )
     text = re.sub(" " + SUFFIXES + "[.] " + STARTERS, " \\1<stop> \\2", text)
     text = re.sub(" " + SUFFIXES + "[.]", " \\1<prd>", text)
     text = re.sub(" " + ALPHABETS + "[.]", " \\1<prd>", text)
@@ -274,12 +278,19 @@ def split_into_lowered_sentences(text):
 For each book in the list of urls, call
 the function that plots the number of times a
 particular phoneme is used in an alliterative sequence.
+
+Args: 
+    list_of_urls: A list of tuples where the first parameter
+    is a string representing the txt file url and the second
+    is the name (str) of the local text file on the machine.
 """
 
 
-def get_all_alliteration_by_phoneme():
+def get_all_alliteration_by_phoneme(list_of_urls):
     for book in list_of_urls:
-        get_alliteration_by_phoneme(book[1])
+        print(book[1])
+        phonemes, words, pairs = get_alliteration_by_phoneme(book[1])
+        plot_alliteration(phonemes, words, pairs, book[1])
 
 
 """
@@ -306,11 +317,10 @@ def get_phonemes(word):
 
 
 """
-Create 3 plots: 1 of the number of times an
-alliterative sequence occurs with a particular
-phoneme in a text, one of the most popular words
-to alliterate with in a text, and 1 of some
-sample alliterative word pairs in the text.
+Create two dictionaries that represent the number of alliterative
+sequences with certain starting phonemes, the most frequently
+alliterated words, and a list of sample word pairs for a given
+text.
 
 Args:
     book_title: A string representing the title of a book. 
@@ -319,13 +329,17 @@ Returns:
     phoneme_dict: A dict mapping phonemes (str) to the
     number of times it was used (int) in an alliterative
     sequence in a given text.
+    word_dict: A dictionary mapping words (str) to the
+    number of times they are used in alliterative
+    sequences (int)
+    pairs: A list of strings representing sample
+    alliterative pairs from a text
 """
 
 
 def get_alliteration_by_phoneme(book_title):
     sentences = get_sentences_from_txt(book_title)
     sentences = split_sentences_into_lists_of_words(sentences)
-    # for sentence in sentences[0]:
     phonemes_in_sentence = []
     phoneme_dict = {}
     word_dict = {}
@@ -334,7 +348,7 @@ def get_alliteration_by_phoneme(book_title):
         phonemes_in_sentence = []
         for word in sentence:
             phonemes_in_sentence.append((get_phonemes(word)[0], word))
-        for word_index in range(0, len(phonemes_in_sentence) - 2):
+        for word_index in range(0, len(phonemes_in_sentence) - 1):
             if (
                 phonemes_in_sentence[word_index][0]
                 == phonemes_in_sentence[word_index + 1][0]
@@ -345,15 +359,18 @@ def get_alliteration_by_phoneme(book_title):
                 if (
                     (not phonemes_in_sentence[word_index][0] == "NONE")
                     and (not phonemes_in_sentence[word_index + 1][0] == "NONE")
-                    and (not phonemes_in_sentence[word_index][1] in common_words)
-                    and (not phonemes_in_sentence[word_index + 1][1] in common_words)
+                    and (
+                        not phonemes_in_sentence[word_index][1] in common_words
+                    )
+                    and (
+                        not phonemes_in_sentence[word_index + 1][1]
+                        in common_words
+                    )
                 ):
                     if phonemes_in_sentence[word_index][0] not in phoneme_dict:
                         phoneme_dict[phonemes_in_sentence[word_index][0]] = 1
                         pairs.append(
-                            (
-                                f"({str(phonemes_in_sentence[word_index][1])}_{str(phonemes_in_sentence[word_index + 1][1])})"
-                            )
+                            f"({str(phonemes_in_sentence[word_index][1])}_{str(phonemes_in_sentence[word_index + 1][1])})"
                         )
                     else:
                         phoneme_dict[phonemes_in_sentence[word_index][0]] += 1
@@ -362,113 +379,22 @@ def get_alliteration_by_phoneme(book_title):
                         word_dict[phonemes_in_sentence[word_index][1]] = 1
                     else:
                         word_dict[phonemes_in_sentence[word_index][1]] += 1
-    print(word_dict)
+
     if "NONE" in phoneme_dict:
         del phoneme_dict["NONE"]
-    phonemes = list(phoneme_dict.keys())
-    num_occurences = list(phoneme_dict.values())
-    fig = plt.figure()
-    ax1 = fig.add_subplot(221)
-    ax2 = fig.add_subplot(222)
-    ax3 = fig.add_subplot(223)
-    ax1.title.set_text(f"Phoneme Usage in {book_title}")
-    ax2.title.set_text("Most Frequently Alliterated words")
-    ax3.title.set_text("Sample Alliterative Pairings")
-
-    fig.set_figheight(15)
-    fig.set_figwidth(20)
-    ax1.set_xlabel("Phoneme")
-    ax1.set_ylabel("Number of Occurences of Alliteration by Phoneme in All Sentences")
-    # spacing = 0.6
-    plt.xticks(fontsize=10)
-    # fig.subplots_adjust(top=spacing + 0.1)
-    # fig.subplots_adjust(bottom=spacing)
-    ax1.bar(
-        range(len(phoneme_dict)), num_occurences, tick_label=phonemes, color="orange"
-    )
-
-    # print(word_dict)
-    wc = WordCloud(
-        background_color="black",
-        width=1000,
-        height=1000,
-        max_words=10,
-        relative_scaling=0.5,
-        normalize_plurals=True,
-    ).generate_from_frequencies(word_dict)
-    ax2.imshow(wc)
-
-    wc = WordCloud(
-        background_color="black",
-        width=1000,
-        height=1000,
-        max_words=10,
-        relative_scaling=0.5,
-        normalize_plurals=True,
-    ).generate(str(pairs))
-    ax3.imshow(wc)
-    return phoneme_dict
+    return phoneme_dict, word_dict, pairs
 
 
 """
-Create a pie chart representing the number of
-words in a given text with a positive, negative,
-and neutral association.
+Given a list of texts, create a dictionary mapping
+the text name (str) to its average sentence length
+(int)
 
 Args:
-    text_file: A text file representing the name of text.
-
-Returns:
-    A tuple representing the number of postively, negatively,
-    and neutrally (ints) associated words in a text.
-"""
-
-
-def get_polarity_whole_text(text_file):
-    f_text = ""
-    with open(f"{text_file}.txt", "r") as f:
-        for line in f:
-            f_text += line
-    text = Text(f_text)
-    print("{:<16}{}".format("Word", "Polarity") + "\n" + "-" * 30)
-    num_negative = 0
-    num_positive = 0
-    num_neutral = 0
-    for w in text.words:
-        if w.polarity == 1:
-            num_positive += 1
-        elif w.polarity == -1:
-            num_negative += 1
-        else:
-            num_neutral += 1
-    labels = "Positive", "Negative", "Neutral"
-    sizes = [num_positive, num_negative, num_neutral]
-    plt.rcParams["text.color"] = "r"
-    fig, ax = plt.subplots()
-    plt.title(f"{text_file.upper()}")
-    ax.pie(
-        sizes,
-        labels=labels,
-        colors=["violet", "paleturquoise", "rosybrown"],
-        autopct="%1.1f%%",
-    )
-    return (num_positive, num_negative, num_neutral)
-
-
-"""
-Generate a word polarity pie chart for every text.
-"""
-
-
-def get_polarity_all_texts():
-    for book in list_of_urls:
-        get_polarity_whole_text(book[1])
-
-
-"""
-Given a list of texts, create a bar graph
-representing the average sentence length
-for each text.
+    list_of_urls: list_of_urls: A list of tuples where the 
+    first parameter is a string representing the txt file
+    url and the second is the name (str) of the local text
+    file on the machine.
 
 Returns: 
     sentence_lengths: A dictionary mapping
@@ -477,29 +403,14 @@ Returns:
 """
 
 
-def get_avg_sentence_length_all_books():
+def get_avg_sentence_length(list_of_urls):
     sentence_lengths = {}
     for book in list_of_urls:
         sentences = get_sentences_from_txt(book[1])
+        sentences = split_sentences_into_lists_of_words(sentences)
         total = 0
         for sentence in sentences:
             total += len(sentence)
         num_sentences = len(sentences)
         sentence_lengths[book[1]] = total / num_sentences
-    fig, ax = plt.subplots()
-    books = list(sentence_lengths.keys())
-    avg_sentence_lengths = list(sentence_lengths.values())
-    fig.set_figheight(10)
-    fig.set_figwidth(10)
-    ax.set_title("Average Sentence Length of Work Over Time")
-    ax.set_xlabel("Book Title")
-    ax.set_ylabel("Average Sentence Length")
-    # spacing = 0.6
-    plt.xticks(fontsize=10)
-    ax.bar(
-        range(len(sentence_lengths)),
-        avg_sentence_lengths,
-        tick_label=books,
-        color="orange",
-    )
     return sentence_lengths
