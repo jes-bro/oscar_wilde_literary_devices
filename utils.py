@@ -178,9 +178,7 @@ Returns:
 
 def plot_most_freq_words_texts(list_of_urls, num_data_pts):
     word_dict = {}
-    print(list_of_urls)
     for book in list_of_urls:
-        print(book)
         sentences = get_sentences_from_txt(book[1])
         lowered_sentences = split_sentences_into_lists_of_words(sentences)
         for sentence in lowered_sentences:
@@ -334,8 +332,6 @@ Returns:
 def get_alliteration_by_phoneme(book_title):
     sentences = get_sentences_from_txt(book_title)
     sentences = split_sentences_into_lists_of_words(sentences)
-    print(sentences)
-    # for sentence in sentences[0]:
     phonemes_in_sentence = []
     phoneme_dict = {}
     word_dict = {}
@@ -343,8 +339,6 @@ def get_alliteration_by_phoneme(book_title):
     for sentence in sentences:
         phonemes_in_sentence = []
         for word in sentence:
-            # print(word[0])
-            # print(get_phonemes(word[0]))
             phonemes_in_sentence.append((get_phonemes(word)[0], word))
         for word_index in range(0, len(phonemes_in_sentence) - 1):
             if (
@@ -403,45 +397,11 @@ def get_avg_sentence_length(list_of_urls):
         sentences = get_sentences_from_txt(book[1])
         sentences = split_sentences_into_lists_of_words(sentences)
         total = 0
-        print(sentences)
-        print(len(sentences))
         for sentence in sentences:
             total += len(sentence)
         num_sentences = len(sentences)
         sentence_lengths[book[1]] = total / num_sentences
     return sentence_lengths
-
-
-"""
-Plot the average sentence length graph
-"""
-
-
-def plot_avg_sentence_lengths_all_books():
-    sentence_lengths = {}
-    for book in list_of_urls:
-        sentences = get_sentences_from_txt(book[1])
-        total = 0
-        for sentence in sentences:
-            total += len(sentence)
-        num_sentences = len(sentences)
-        sentence_lengths[book[1]] = total / num_sentences
-    fig, ax = plt.subplots()
-    books = list(sentence_lengths.keys())
-    avg_sentence_lengths = list(sentence_lengths.values())
-    fig.set_figheight(10)
-    fig.set_figwidth(10)
-    ax.set_title("Average Sentence Length of Work Over Time")
-    ax.set_xlabel("Book Title")
-    ax.set_ylabel("Average Sentence Length")
-    # spacing = 0.6
-    plt.xticks(fontsize=10)
-    ax.bar(
-        range(len(sentence_lengths)),
-        avg_sentence_lengths,
-        tick_label=books,
-        color="orange",
-    )
 
 
 """
@@ -477,7 +437,6 @@ def plot_alliteration(
         color="orange",
     )
 
-    # print(word_dict)
     wc = WordCloud(
         background_color="black",
         width=1000,
