@@ -121,7 +121,7 @@ def test_files_dir():
         # Test that no sequential alliterative sequences get picked up
         # when there aren't any present
         ("example_book_1", {}, {}, [],),
-        # Test that peter piper picked a peck of pickled peppers returns what we expect
+        # Test that peter piper picked a peck of pickled onions returns what we expect
         (
             "example_book_2",
             {"P": 2},
