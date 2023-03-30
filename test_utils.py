@@ -64,6 +64,41 @@ split_into_lowered_sentences_cases = [
         "Hello World? This is a test sentence. Do not panic! 1234.",
         ["hello world?", "this is a test sentence.", "do not panic!", "1234."],
     ),
+    # Check that it works with urls
+    (
+        "Visit our website at www.example.com.",
+        ["visit our website at www.example.com."],
+    ),
+    # Check that it works with Dr.
+    (
+        "Visit our website Dr. www.example.com.",
+        ["visit our website dr. www.example.com."],
+    ),
+    # Check that it works with Mrs.
+    (
+        "Visit our website Mrs. www.example.com.",
+        ["visit our website mrs. www.example.com."],
+    ),
+    # Check that it works with Mr.
+    (
+        "Visit our website Mr. www.example.com.",
+        ["visit our website mr. www.example.com."],
+    ),
+    # Check that it works with commas
+    (
+        "Visit our website Mr, www.example.com.",
+        ["visit our website mr, www.example.com."],
+    ),
+    # Check that it works with Mrs. two sentences
+    (
+        "Hello World? This is a test Mrs. sentence. Do not panic! 1234.",
+        [
+            "hello world?",
+            "this is a test mrs. sentence.",
+            "do not panic!",
+            "1234.",
+        ],
+    ),
 ]
 
 get_avg_sentence_length_cases = [
@@ -104,7 +139,7 @@ split_sentences_into_lists_of_words_cases = [
     ),
     # Test with sentence containing no space
     (["Thisisasamplesentence."], [["Thisisasamplesentence."]]),
-    # Test with the precense of a question mark
+    # Test with the presence of a question mark
     (["Thisisasamplesentence?"], [["Thisisasamplesentence?"]]),
     # Test an upper case letter in the middle of the sentence
     (
@@ -112,6 +147,43 @@ split_sentences_into_lists_of_words_cases = [
         [
             ["This", "is", "a", "Sample", "sentence."],
             ["This", "is", "another", "Sample", "sentence."],
+        ],
+    ),
+    # Test with Mrs. and multiple sentences
+    (
+        ["This is a Mrs. sentence.", "This is another Sample sentence."],
+        [
+            ["This", "is", "a", "Mrs.", "sentence."],
+            ["This", "is", "another", "Sample", "sentence."],
+        ],
+    ),
+    # Test with Mr. and multiple sentences
+    (
+        ["This is a Mr. sentence.", "This is another Sample sentence."],
+        [
+            ["This", "is", "a", "Mr.", "sentence."],
+            ["This", "is", "another", "Sample", "sentence."],
+        ],
+    ),
+    # Test with Rev. and multiple sentences
+    (
+        ["This is a Rev. sentence.", "This is another Sample sentence."],
+        [
+            ["This", "is", "a", "Rev.", "sentence."],
+            ["This", "is", "another", "Sample", "sentence."],
+        ],
+    ),
+    # Test with no punctuation in last sentence
+    (
+        [
+            "This is a Rev. sentence.",
+            "This is another Sample sentence.",
+            "fragment",
+        ],
+        [
+            ["This", "is", "a", "Rev.", "sentence."],
+            ["This", "is", "another", "Sample", "sentence."],
+            ["fragment"],
         ],
     ),
 ]
@@ -127,7 +199,7 @@ get_phonemes_cases = [
     ("1234", ["NONE"]),
     # Test with a th word
     ("though", ["DH", "OW1"]),
-    # Test with the
+    # Test with the, another th to verify same phoneme
     ("the", ["DH", "AH0"]),
     # Test that it does not work with capital letters
     ("The", ["NONE"]),
@@ -160,7 +232,7 @@ def test_get_phonemes(input_str, output_list):
     given word.
 
     Look up and return the first phoneme associated
-    with the given word to 
+    with the given word to
 
     Args:
         word: A string representing a word in a text.
@@ -229,7 +301,7 @@ def test_get_avg_sentence_length(input_tuple, output_dict):
     representing the average sentence length
     for each text.
 
-    Returns: 
+    Returns:
         sentence_lengths: A dictionary mapping
         texts (string) to their average sentence
         length (int).
@@ -264,7 +336,7 @@ def test_get_avg_sentence_length(input_list, output_list):
     representing the average sentence length
     for each text.
 
-    Returns: 
+    Returns:
         sentence_lengths: A dictionary mapping
         texts (string) to their average sentence
         length (int).
@@ -290,6 +362,12 @@ def test_files_dir():
             {"peter": 1, "piper": 1},
             ["(peter_piper)"],
         ),
+        # Test that repeated words don't return alliteration
+        ("test_txt1", {}, {}, [],),
+        # Test that 2 different repeated words don't return alliteration
+        ("test_txt1", {}, {}, [],),
+        # check that multiple alliterated sequences are accounted for
+        ("test_txt11", {"S": 1}, {"sells": 1}, ["(sells_sea)"]),
     ],
 )
 def test_get_alliteration_by_phoneme(
@@ -299,6 +377,25 @@ def test_get_alliteration_by_phoneme(
     expected_word_dict,
     expected_pairs,
 ):
+    """
+    Create two dictionaries that represent the number of alliterative
+    sequences with certain starting phonemes, the most frequently
+    alliterated words, and a list of sample word pairs for a given
+    text.
+
+    Args:
+        book_title: A string representing the title of a book. 
+
+    Returns:
+        phoneme_dict: A dict mapping phonemes (str) to the
+        number of times it was used (int) in an alliterative
+        sequence in a given text.
+        word_dict: A dictionary mapping words (str) to the
+        number of times they are used in alliterative
+        sequences (int)
+        pairs: A list of strings representing sample
+        alliterative pairs from a text
+    """
     filepath = os.path.join(test_files_dir, filename)
     phoneme_dict, word_dict, pairs = get_alliteration_by_phoneme(filepath)
     assert phoneme_dict == expected_phoneme_dict
@@ -309,7 +406,7 @@ def test_get_alliteration_by_phoneme(
 @pytest.mark.parametrize("input_str,output_list", get_sentences_from_txt_cases)
 def test_sentences_from_txt(input_str, output_list):
     """
-    Create sentences by reading a text file. 
+    Create sentences by reading a text file.
 
     Split the text from a single text in
     the corpus into a list of strings of
@@ -317,7 +414,7 @@ def test_sentences_from_txt(input_str, output_list):
 
     Args:
         book_title: A string representing
-        the title of the book. 
+        the title of the book.
 
     Returns:
         sentences: A list of strings representing each

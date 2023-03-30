@@ -4,11 +4,39 @@ A file to store plotting functions
 
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
+from utils import get_alliteration_by_phoneme
+
+"""
+Plot bar graph for all books.
+"""
 
 
 def plot_freq_bar(
     most_freq,
     title="Most Popular Words Across All Books",
+    ylabel="Number of Occurences Across Texts",
+    xlabel="Most Popular Words Across Texts",
+):
+    fig, ax = plt.subplots()
+    words = list(most_freq.keys())
+    frequencies = list(most_freq.values())
+    plt.bar(range(len(most_freq)), frequencies, tick_label=words)
+    fig.set_figheight(7)
+    fig.set_figwidth(20)
+    ax.set_title(title)
+    ax.set_ylabel(ylabel)
+    ax.set_xlabel(xlabel)
+    plt.xticks(fontsize=10)
+
+
+"""
+Plot bar graph for all books.
+"""
+
+
+def plot_freq_bar_one_book(
+    most_freq,
+    title,
     ylabel="Number of Occurences Across Texts",
     xlabel="Most Popular Words Across Texts",
 ):
@@ -67,7 +95,6 @@ Args:
 
 def get_all_alliteration_by_phoneme(list_of_urls):
     for book in list_of_urls:
-        print(book[1])
         phonemes, words, pairs = get_alliteration_by_phoneme(book[1])
         plot_alliteration(phonemes, words, pairs, book[1])
 
@@ -91,7 +118,9 @@ def plot_alliteration(phoneme_dict, word_dict, pairs, book_title):
     fig.set_figheight(15)
     fig.set_figwidth(20)
     ax1.set_xlabel("Phoneme")
-    ax1.set_ylabel("Number of Occurences of Alliteration by Phoneme in All Sentences")
+    ax1.set_ylabel(
+        "Number of Occurences of Alliteration by Phoneme in All Sentences"
+    )
     # spacing = 0.6
     plt.xticks(fontsize=10)
     # fig.subplots_adjust(top=spacing + 0.1)
@@ -123,11 +152,11 @@ def plot_alliteration(phoneme_dict, word_dict, pairs, book_title):
     ).generate(str(pairs))
     ax3.imshow(wc)
 
+
 def plot_tf_idf(tf_list, tfidf_cuttoff):
     """Creates a scatter plot of TFIDF scores of different words mapped to their frequency.
 
     Args:
         tf_list (list): list of dictionaries containing words mapped to TFIDF scores.
-        tfidf_cuttoff (float): for  
+        tfidf_cuttoff (float): for
     """
-        
