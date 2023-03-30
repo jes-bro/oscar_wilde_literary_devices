@@ -250,9 +250,7 @@ def split_into_lowered_sentences(text):
         "\\1<prd>\\2<prd>\\3<prd>",
         text,
     )
-    text = re.sub(
-        ALPHABETS + "[.]" + ALPHABETS + "[.]", "\\1<prd>\\2<prd>", text
-    )
+    text = re.sub(ALPHABETS + "[.]" + ALPHABETS + "[.]", "\\1<prd>\\2<prd>", text)
     text = re.sub(" " + SUFFIXES + "[.] " + STARTERS, " \\1<stop> \\2", text)
     text = re.sub(" " + SUFFIXES + "[.]", " \\1<prd>", text)
     text = re.sub(" " + ALPHABETS + "[.]", " \\1<prd>", text)
@@ -288,7 +286,6 @@ Args:
 
 def get_all_alliteration_by_phoneme(list_of_urls):
     for book in list_of_urls:
-        print(book[1])
         phonemes, words, pairs = get_alliteration_by_phoneme(book[1])
         plot_alliteration(phonemes, words, pairs, book[1])
 
@@ -359,13 +356,8 @@ def get_alliteration_by_phoneme(book_title):
                 if (
                     (not phonemes_in_sentence[word_index][0] == "NONE")
                     and (not phonemes_in_sentence[word_index + 1][0] == "NONE")
-                    and (
-                        not phonemes_in_sentence[word_index][1] in common_words
-                    )
-                    and (
-                        not phonemes_in_sentence[word_index + 1][1]
-                        in common_words
-                    )
+                    and (not phonemes_in_sentence[word_index][1] in common_words)
+                    and (not phonemes_in_sentence[word_index + 1][1] in common_words)
                 ):
                     if phonemes_in_sentence[word_index][0] not in phoneme_dict:
                         phoneme_dict[phonemes_in_sentence[word_index][0]] = 1

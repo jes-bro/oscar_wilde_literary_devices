@@ -131,6 +131,12 @@ def remove_titles(new_lowered):
         new_lowered.remove("mrs")
     for _ in range(new_lowered.count("miss")):
         new_lowered.remove("miss")
+    for _ in range(new_lowered.count("earl")):
+        new_lowered.remove("earl")
+    for _ in range(new_lowered.count("sir")):
+        new_lowered.remove("sir")
+    for _ in range(new_lowered.count("ma'am")):
+        new_lowered.remove("ma'am")
     return new_lowered
 
 
@@ -149,3 +155,41 @@ def remove_character_names(new_lowered, character_tuple):
         for _ in range(new_lowered.count(character)):
             new_lowered.remove(character)
     return new_lowered
+
+
+def initial_text_processing(num, corpus, start_end_dict, character_dict):
+    """Performs all data processing in this file.
+
+    Args:
+        num (integer): An integer representing the index in the corpus of the
+        book you are doing the data processing on.
+        corpus (list): A list of tuples containing the urls and titles
+        of a corpus to import and process
+        start_end_dict (dictionary): A dictionary mapping titles to tuples
+        of start and end words.
+        character_dict (dictionary): A dictionary mapping titles to tuples
+        containing a list of main characters.
+
+    Returns:
+        processed_words (list): a list of words that appear in the given novel,
+        in lowercase, without starting words, ending words, common words,
+        punctuation, titles, and main characters.
+    """
+    title = corpus[num][1]
+    url = corpus[num][0]
+    start_word = start_end_dict[title][0]
+    end_word = start_end_dict[title][1]
+    characters = character_dict[title]
+
+    return remove_character_names(
+        remove_titles(
+            remove_punctuation(
+                remove_extra_text(
+                    remove_encoding_marks(get_data_from_book(url, title)),
+                    start_word,
+                    end_word,
+                )
+            )
+        ),
+        characters,
+    )
