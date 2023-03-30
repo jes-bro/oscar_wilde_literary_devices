@@ -6,6 +6,10 @@ from utils import (
     plot_most_freq_words_texts,
     split_into_lowered_sentences,
     get_alliteration_by_phoneme,
+    get_avg_sentence_length,
+    split_sentences_into_lists_of_words,
+    get_phonemes,
+    get_sentences_from_txt,
 )
 import pytest
 import os
@@ -62,6 +66,112 @@ split_into_lowered_sentences_cases = [
     ),
 ]
 
+get_avg_sentence_length_cases = [
+    # See if it accurately counts the average sentence
+    # length of two text files, each containing one
+    # sentence of length 3
+    (
+        [("fake_url", "test_txt8"), ("fake_url", "test_txt9")],
+        {"test_txt8": 3, "test_txt9": 3},
+    ),
+    # Test with a single URL
+    ([("fake_url", "test_txt1")], {"test_txt1": 10},),
+    # Test with multiple URLs of different lengths, with
+    # one file having a non-integer average
+    (
+        [("fake_url", "test_txt1"), ("fake_url", "test_txt2"),],
+        {"test_txt1": 10, "test_txt2": 3},
+    ),
+    # Test with empty input
+    ([], {}),
+]
+
+split_sentences_into_lists_of_words_cases = [
+    # Test with empty input
+    ([], []),
+    # Test with a single sentence
+    (
+        ["This is a sample sentence."],
+        [["This", "is", "a", "sample", "sentence."]],
+    ),
+    # Test with multiple sentences
+    (
+        ["This is a sample sentence.", "This is another sample sentence."],
+        [
+            ["This", "is", "a", "sample", "sentence."],
+            ["This", "is", "another", "sample", "sentence."],
+        ],
+    ),
+    # Test with sentence containing no space
+    (["Thisisasamplesentence."], [["Thisisasamplesentence."]]),
+    # Test with the precense of a question mark
+    (["Thisisasamplesentence?"], [["Thisisasamplesentence?"]]),
+    # Test an upper case letter in the middle of the sentence
+    (
+        ["This is a Sample sentence.", "This is another Sample sentence."],
+        [
+            ["This", "is", "a", "Sample", "sentence."],
+            ["This", "is", "another", "Sample", "sentence."],
+        ],
+    ),
+]
+
+get_phonemes_cases = [
+    # Test with a valid word
+    ("hello", ["HH", "AH0", "L", "OW1"]),
+    # Test with a word not in the phoneme dictionary
+    ("non-existent-word", ["NONE"]),
+    # Test with an empty input
+    ("", ["NONE"]),
+    # Test with a number
+    ("1234", ["NONE"]),
+    # Test with a th word
+    ("though", ["DH", "OW1"]),
+    # Test with the
+    ("the", ["DH", "AH0"]),
+    # Test that it does not work with capital letters
+    ("The", ["NONE"]),
+]
+
+get_sentences_from_txt_cases = [
+    # Test single sentence
+    # and test that capitalization is lowered
+    ("test_txt1", ["have have have have have have have have have not."]),
+    # Test multiple sentences
+    # and test that capitalization is lowered
+    (
+        "test_txt2",
+        [
+            "hello hello hello?",
+            "hello from the other side.",
+            "hello from!",
+            "the other side.",
+            "hello from the other side.",
+            "side side.",
+        ],
+    ),
+]
+
+
+@pytest.mark.parametrize("input_str,output_list", get_phonemes_cases)
+def test_get_phonemes(input_str, output_list):
+    """
+    Retrieve the phonemes associated with a
+    given word.
+
+    Look up and return the first phoneme associated
+    with the given word to 
+
+    Args:
+        word: A string representing a word in a text.
+
+    Returns:
+        A list of a string representing the phonemes
+        associated with the word.
+    """
+
+    assert get_phonemes(input_str) == output_list
+
 
 @pytest.mark.parametrize(
     "input_tuple,output_dict", plot_most_freq_words_texts_cases
@@ -110,6 +220,58 @@ def test_split_into_lowered_sentences(input_str, output_list):
     assert split_into_lowered_sentences(input_str) == output_list
 
 
+@pytest.mark.parametrize(
+    "input_tuple,output_dict", get_avg_sentence_length_cases
+)
+def test_get_avg_sentence_length(input_tuple, output_dict):
+    """
+    Given a list of texts, create a bar graph
+    representing the average sentence length
+    for each text.
+
+    Returns: 
+        sentence_lengths: A dictionary mapping
+        texts (string) to their average sentence
+        length (int).
+    """
+    assert get_avg_sentence_length(input_tuple) == output_dict
+
+
+"""
+Split a list of strings representing sentences
+into lists of lists of strings, where the
+elements at each index in the inner lists are
+words and the list containing the words is a
+sentence
+
+Args:
+    sentences: A list of strings representing
+    the sentences in a given text.
+
+Returns:
+    sentences: A list of lists of strings
+    representing lists of the words in every
+    sentence.
+"""
+
+
+@pytest.mark.parametrize(
+    "input_list,output_list", split_sentences_into_lists_of_words_cases
+)
+def test_get_avg_sentence_length(input_list, output_list):
+    """
+    Given a list of texts, create a bar graph
+    representing the average sentence length
+    for each text.
+
+    Returns: 
+        sentence_lengths: A dictionary mapping
+        texts (string) to their average sentence
+        length (int).
+    """
+    assert split_sentences_into_lists_of_words(input_list) == output_list
+
+
 @pytest.fixture(scope="module")
 def test_files_dir():
     return os.path.join(os.path.dirname(__file__), "test_files")
@@ -142,3 +304,23 @@ def test_get_alliteration_by_phoneme(
     assert phoneme_dict == expected_phoneme_dict
     assert word_dict == expected_word_dict
     assert pairs == expected_pairs
+
+
+@pytest.mark.parametrize("input_str,output_list", get_sentences_from_txt_cases)
+def test_sentences_from_txt(input_str, output_list):
+    """
+    Create sentences by reading a text file. 
+
+    Split the text from a single text in
+    the corpus into a list of strings of
+    sentences.
+
+    Args:
+        book_title: A string representing
+        the title of the book. 
+
+    Returns:
+        sentences: A list of strings representing each
+        sentence in the given text.
+    """
+    assert get_sentences_from_txt(input_str) == output_list
