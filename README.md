@@ -23,6 +23,8 @@ nltk.download("cmudict")
 ```
 To download the CMU dictionary of phonemes for the alliteration function
 
+We also make extensive use of re, itertools, and other built-in python libraries.
+
 ## Usage
 
 The oscar_wilde_literary_devices.ipynb file has cells that denote how to use all of our plotting functions. Simply replace the urls in list_of_urls with the ones you care about analyzing to make the functions create plots specific to your data. 
