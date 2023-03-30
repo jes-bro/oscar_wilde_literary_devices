@@ -298,7 +298,6 @@ Returns:
 
 def get_phonemes(word):
     if word in phoneme_dictionary:
-        print(phoneme_dictionary[word])
         return phoneme_dictionary[word][0]
     else:
         return ["NONE"]

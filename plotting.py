@@ -4,6 +4,7 @@ A file to store plotting functions
 
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
+from utils import get_alliteration_by_phoneme
 
 """
 Plot bar graph for all books.
@@ -94,7 +95,6 @@ Args:
 
 def get_all_alliteration_by_phoneme(list_of_urls):
     for book in list_of_urls:
-        print(book[1])
         phonemes, words, pairs = get_alliteration_by_phoneme(book[1])
         plot_alliteration(phonemes, words, pairs, book[1])
 
