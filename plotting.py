@@ -30,15 +30,7 @@ Args:
 """
 
 
-def plot_avg_sentence_lengths_all_books(list_of_urls):
-    sentence_lengths = {}
-    for book in list_of_urls:
-        sentences = get_sentences_from_txt(book[1])
-        total = 0
-        for sentence in sentences:
-            total += len(sentence)
-        num_sentences = len(sentences)
-        sentence_lengths[book[1]] = total / num_sentences
+def plot_avg_sentence_lengths_all_books(sentence_lengths):
     fig, ax = plt.subplots()
     books = list(sentence_lengths.keys())
     avg_sentence_lengths = list(sentence_lengths.values())
