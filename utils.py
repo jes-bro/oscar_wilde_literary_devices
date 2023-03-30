@@ -30,7 +30,7 @@ list_of_urls = [
     ("https://www.gutenberg.org/cache/epub/30120/pg30120.txt", "happy_prince"),
 ]
 
-list_of_test_urls = [("")]
+list_of_test_urls = [""]
 
 common_words = [
     "is",
@@ -244,6 +244,11 @@ def split_into_lowered_sentences(text):
         text = text.replace("d.d.:", "d<prd>d<prd>")
     if "dr." in text:
         text = text.replace("dr.", "dr<prd>")
+    if "mr." in text:
+        text = text.replace("mr.", "mr<prd>")
+    if "mrs." in text:
+        text = text.replace("mrs.", "mrs<prd>")
+
     text = re.sub("\s" + ALPHABETS + "[.] ", " \\1<prd> ", text)
     text = re.sub(ACRONYMS + " " + STARTERS, "\\1<stop> \\2", text)
     text = re.sub(

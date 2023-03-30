@@ -199,7 +199,7 @@ get_phonemes_cases = [
     ("1234", ["NONE"]),
     # Test with a th word
     ("though", ["DH", "OW1"]),
-    # Test with the
+    # Test with the, another th to verify same phoneme
     ("the", ["DH", "AH0"]),
     # Test that it does not work with capital letters
     ("The", ["NONE"]),

@@ -91,7 +91,9 @@ def plot_alliteration(phoneme_dict, word_dict, pairs, book_title):
     fig.set_figheight(15)
     fig.set_figwidth(20)
     ax1.set_xlabel("Phoneme")
-    ax1.set_ylabel("Number of Occurences of Alliteration by Phoneme in All Sentences")
+    ax1.set_ylabel(
+        "Number of Occurences of Alliteration by Phoneme in All Sentences"
+    )
     # spacing = 0.6
     plt.xticks(fontsize=10)
     # fig.subplots_adjust(top=spacing + 0.1)
@@ -123,11 +125,11 @@ def plot_alliteration(phoneme_dict, word_dict, pairs, book_title):
     ).generate(str(pairs))
     ax3.imshow(wc)
 
+
 def plot_tf_idf(tf_list, tfidf_cuttoff):
     """Creates a scatter plot of TFIDF scores of different words mapped to their frequency.
 
     Args:
         tf_list (list): list of dictionaries containing words mapped to TFIDF scores.
-        tfidf_cuttoff (float): for  
+        tfidf_cuttoff (float): for
     """
-        
