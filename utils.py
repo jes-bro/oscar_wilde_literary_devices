@@ -8,6 +8,7 @@ import re
 import itertools
 import nltk
 from polyglot.text import Text
+from plotting import plot_alliteration
 
 
 phoneme_dictionary = nltk.corpus.cmudict.dict()
@@ -277,12 +278,19 @@ def split_into_lowered_sentences(text):
 For each book in the list of urls, call
 the function that plots the number of times a
 particular phoneme is used in an alliterative sequence.
+
+Args: 
+    list_of_urls: A list of tuples where the first parameter
+    is a string representing the txt file url and the second
+    is the name (str) of the local text file on the machine.
 """
 
 
-def get_all_alliteration_by_phoneme():
+def get_all_alliteration_by_phoneme(list_of_urls):
     for book in list_of_urls:
-        get_alliteration_by_phoneme(book[1])
+        print(book[1])
+        phonemes, words, pairs = get_alliteration_by_phoneme(book[1])
+        plot_alliteration(phonemes, words, pairs, book[1])
 
 
 """
@@ -374,15 +382,19 @@ def get_alliteration_by_phoneme(book_title):
 
     if "NONE" in phoneme_dict:
         del phoneme_dict["NONE"]
-    phonemes = list(phoneme_dict.keys())
-    num_occurences = list(phoneme_dict.values())
     return phoneme_dict, word_dict, pairs
 
 
 """
-Given a list of texts, create a bar graph
-representing the average sentence length
-for each text.
+Given a list of texts, create a dictionary mapping
+the text name (str) to its average sentence length
+(int)
+
+Args:
+    list_of_urls: list_of_urls: A list of tuples where the 
+    first parameter is a string representing the txt file
+    url and the second is the name (str) of the local text
+    file on the machine.
 
 Returns: 
     sentence_lengths: A dictionary mapping
@@ -402,57 +414,3 @@ def get_avg_sentence_length(list_of_urls):
         num_sentences = len(sentences)
         sentence_lengths[book[1]] = total / num_sentences
     return sentence_lengths
-
-
-"""
-Plot the alliteration plots
-"""
-
-
-def plot_alliteration(
-    phoneme_dict, phonemes, num_occurences, word_dict, book_title, pairs
-):
-    fig = plt.figure()
-    ax1 = fig.add_subplot(221)
-    ax2 = fig.add_subplot(222)
-    ax3 = fig.add_subplot(223)
-    ax1.title.set_text(f"Phoneme Usage in {book_title}")
-    ax2.title.set_text("Most Frequently Alliterated words")
-    ax3.title.set_text("Sample Alliterative Pairings")
-
-    fig.set_figheight(15)
-    fig.set_figwidth(20)
-    ax1.set_xlabel("Phoneme")
-    ax1.set_ylabel(
-        "Number of Occurences of Alliteration by Phoneme in All Sentences"
-    )
-    # spacing = 0.6
-    plt.xticks(fontsize=10)
-    # fig.subplots_adjust(top=spacing + 0.1)
-    # fig.subplots_adjust(bottom=spacing)
-    ax1.bar(
-        range(len(phoneme_dict)),
-        num_occurences,
-        tick_label=phonemes,
-        color="orange",
-    )
-
-    wc = WordCloud(
-        background_color="black",
-        width=1000,
-        height=1000,
-        max_words=10,
-        relative_scaling=0.5,
-        normalize_plurals=True,
-    ).generate_from_frequencies(word_dict)
-    ax2.imshow(wc)
-
-    wc = WordCloud(
-        background_color="black",
-        width=1000,
-        height=1000,
-        max_words=10,
-        relative_scaling=0.5,
-        normalize_plurals=True,
-    ).generate(str(pairs))
-    ax3.imshow(wc)

@@ -4,7 +4,7 @@ A file to store plotting functions
 
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
-from utils import get_sentences_from_txt
+from utils import *
 
 
 def plot_freq_bar(most_freq):
@@ -47,3 +47,57 @@ def plot_avg_sentence_lengths_all_books(sentence_lengths):
         tick_label=books,
         color="orange",
     )
+
+
+"""
+Plot the alliteration plots
+"""
+
+
+def plot_alliteration(phoneme_dict, word_dict, pairs, book_title):
+    phonemes = list(phoneme_dict.keys())
+    num_occurences = list(phoneme_dict.values())
+    fig = plt.figure()
+    ax1 = fig.add_subplot(221)
+    ax2 = fig.add_subplot(222)
+    ax3 = fig.add_subplot(223)
+    ax1.title.set_text(f"Phoneme Usage in {book_title}")
+    ax2.title.set_text("Most Frequently Alliterated words")
+    ax3.title.set_text("Sample Alliterative Pairings")
+
+    fig.set_figheight(15)
+    fig.set_figwidth(20)
+    ax1.set_xlabel("Phoneme")
+    ax1.set_ylabel(
+        "Number of Occurences of Alliteration by Phoneme in All Sentences"
+    )
+    # spacing = 0.6
+    plt.xticks(fontsize=10)
+    # fig.subplots_adjust(top=spacing + 0.1)
+    # fig.subplots_adjust(bottom=spacing)
+    ax1.bar(
+        range(len(phoneme_dict)),
+        num_occurences,
+        tick_label=phonemes,
+        color="orange",
+    )
+
+    wc = WordCloud(
+        background_color="black",
+        width=1000,
+        height=1000,
+        max_words=10,
+        relative_scaling=0.5,
+        normalize_plurals=True,
+    ).generate_from_frequencies(word_dict)
+    ax2.imshow(wc)
+
+    wc = WordCloud(
+        background_color="black",
+        width=1000,
+        height=1000,
+        max_words=10,
+        relative_scaling=0.5,
+        normalize_plurals=True,
+    ).generate(str(pairs))
+    ax3.imshow(wc)
