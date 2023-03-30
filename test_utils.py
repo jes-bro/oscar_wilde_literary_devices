@@ -8,13 +8,13 @@ import pytest
 
 
 list_of_urls = [("fake_url", "test_txt1")]
-get_complement_cases = [
+plot_most_freq_words_texts_cases = [
     # Check that the complement of A is T.
-    ((("fake_url", "test_txt1"), 2), {"have": 9, "not": 1}),
+    (([("fake_url", "test_txt1")], 2), {"have": 9, "not": 1}),
 ]
 
 
-@pytest.mark.parametrize("input_tuple,output_dict", get_complement_cases)
+@pytest.mark.parametrize("input_tuple,output_dict", plot_most_freq_words_texts_cases)
 def test_plot_most_freq_words_texts(input_tuple, output_dict):
     """
     Test that each nucleotide is mapped to its correct complement.
