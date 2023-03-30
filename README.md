@@ -33,6 +33,8 @@ Personally, we used urls from Project Gutenberg that point to text files of Wild
 
 The utils.py file contains all of the data analysis functions, the plotting.py function contains all plotting functions, and the text_processing.py file contains all data cleaning functions.
 
+The test_txt + number files are used in unit testing. Feel free to create your own text files in this directory to run unit tests. It does not need to follow the same naming scheme. 
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first

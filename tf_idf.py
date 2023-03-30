@@ -58,5 +58,7 @@ def compute_tf_idf(tf_dict, corpus):
         for novel in corpus:
             if term in novel:
                 novel_occurences += 1
-        tf_idf_dict[term] = frequency * math.log10(len(corpus) / novel_occurences)
+        tf_idf_dict[term] = frequency * math.log10(
+            len(corpus) / novel_occurences
+        )
     return tf_idf_dict

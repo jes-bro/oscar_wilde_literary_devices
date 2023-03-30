@@ -54,6 +54,25 @@ def plot_avg_sentence_lengths_all_books(sentence_lengths):
 
 
 """
+For each book in the list of urls, call
+the function that plots the number of times a
+particular phoneme is used in an alliterative sequence.
+
+Args: 
+    list_of_urls: A list of tuples where the first parameter
+    is a string representing the txt file url and the second
+    is the name (str) of the local text file on the machine.
+"""
+
+
+def get_all_alliteration_by_phoneme(list_of_urls):
+    for book in list_of_urls:
+        print(book[1])
+        phonemes, words, pairs = get_alliteration_by_phoneme(book[1])
+        plot_alliteration(phonemes, words, pairs, book[1])
+
+
+"""
 Plot the alliteration plots
 """
 

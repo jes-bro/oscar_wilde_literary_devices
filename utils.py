@@ -8,8 +8,7 @@ import re
 import itertools
 import nltk
 from polyglot.text import Text
-from plotting import plot_alliteration
-
+import math
 
 phoneme_dictionary = nltk.corpus.cmudict.dict()
 ALPHABETS = "([A-Za-z])"
@@ -250,7 +249,9 @@ def split_into_lowered_sentences(text):
         "\\1<prd>\\2<prd>\\3<prd>",
         text,
     )
-    text = re.sub(ALPHABETS + "[.]" + ALPHABETS + "[.]", "\\1<prd>\\2<prd>", text)
+    text = re.sub(
+        ALPHABETS + "[.]" + ALPHABETS + "[.]", "\\1<prd>\\2<prd>", text
+    )
     text = re.sub(" " + SUFFIXES + "[.] " + STARTERS, " \\1<stop> \\2", text)
     text = re.sub(" " + SUFFIXES + "[.]", " \\1<prd>", text)
     text = re.sub(" " + ALPHABETS + "[.]", " \\1<prd>", text)
@@ -273,25 +274,7 @@ def split_into_lowered_sentences(text):
 
 
 """
-For each book in the list of urls, call
-the function that plots the number of times a
-particular phoneme is used in an alliterative sequence.
-
-Args: 
-    list_of_urls: A list of tuples where the first parameter
-    is a string representing the txt file url and the second
-    is the name (str) of the local text file on the machine.
-"""
-
-
-def get_all_alliteration_by_phoneme(list_of_urls):
-    for book in list_of_urls:
-        phonemes, words, pairs = get_alliteration_by_phoneme(book[1])
-        plot_alliteration(phonemes, words, pairs, book[1])
-
-
-"""
-Retrieve the first phoneme associated with a
+Retrieve the phonemes associated with a
 given word.
 
 Look up and return the first phoneme associated
@@ -301,16 +284,17 @@ Args:
     word: A string representing a word in a text.
 
 Returns:
-    A string representing the first phoneme
+    A list of a string representing the phonemes
     associated with the word.
 """
 
 
 def get_phonemes(word):
     if word in phoneme_dictionary:
-        return phoneme_dictionary[word][0]  # return first entry by convention
+        print(phoneme_dictionary[word])
+        return phoneme_dictionary[word][0]
     else:
-        return ["NONE"]  # no entries found for input word
+        return ["NONE"]
 
 
 """
@@ -344,6 +328,7 @@ def get_alliteration_by_phoneme(book_title):
     for sentence in sentences:
         phonemes_in_sentence = []
         for word in sentence:
+            # Append first phoneme only
             phonemes_in_sentence.append((get_phonemes(word)[0], word))
         for word_index in range(0, len(phonemes_in_sentence) - 1):
             if (
@@ -356,8 +341,13 @@ def get_alliteration_by_phoneme(book_title):
                 if (
                     (not phonemes_in_sentence[word_index][0] == "NONE")
                     and (not phonemes_in_sentence[word_index + 1][0] == "NONE")
-                    and (not phonemes_in_sentence[word_index][1] in common_words)
-                    and (not phonemes_in_sentence[word_index + 1][1] in common_words)
+                    and (
+                        not phonemes_in_sentence[word_index][1] in common_words
+                    )
+                    and (
+                        not phonemes_in_sentence[word_index + 1][1]
+                        in common_words
+                    )
                 ):
                     if phonemes_in_sentence[word_index][0] not in phoneme_dict:
                         phoneme_dict[phonemes_in_sentence[word_index][0]] = 1
@@ -404,5 +394,5 @@ def get_avg_sentence_length(list_of_urls):
         for sentence in sentences:
             total += len(sentence)
         num_sentences = len(sentences)
-        sentence_lengths[book[1]] = total / num_sentences
+        sentence_lengths[book[1]] = math.floor(total / num_sentences)
     return sentence_lengths
