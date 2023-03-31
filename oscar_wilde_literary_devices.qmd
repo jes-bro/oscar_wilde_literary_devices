@@ -113,18 +113,18 @@ character_dict = {"Lord Arthur Savile's Crime and Other Short Stories": ('winder
                            "The Ballad of Reading Gaol": ("",),
                            "An Ideal Husband": ('caversham', 'viscount', 'goring', 'robert', 'chiltern', 'vicomte', 'montford', 'pipps', 'mason', 'james', 'cheveley', 'mabel', 'phipps', 'markby', 'gertrude', 'arthur', '', 'basildon', 'marchmont')}
 
-lord_arthur_saviles_crimes = text_processing.initial_text_processing(0, ow_corpus_list, ow_start_end_words_dict, character_dict)
-the_happy_prince = text_processing.initial_text_processing(1, ow_corpus_list, ow_start_end_words_dict, character_dict)
-dorian_grey = text_processing.initial_text_processing(2, ow_corpus_list, ow_start_end_words_dict, character_dict)
-salome = text_processing.initial_text_processing(3, ow_corpus_list, ow_start_end_words_dict, character_dict)
-house_of_pomegranates = text_processing.initial_text_processing(4, ow_corpus_list, ow_start_end_words_dict, character_dict)
-ducchess_of_padua = text_processing.initial_text_processing(5, ow_corpus_list, ow_start_end_words_dict, character_dict)
-the_soul_under_socialism = text_processing.initial_text_processing(6, ow_corpus_list, ow_start_end_words_dict, character_dict)
-lady_windermeres_fan = text_processing.initial_text_processing(7, ow_corpus_list, ow_start_end_words_dict, character_dict)
-a_woman_of_no_importance = text_processing.initial_text_processing(8, ow_corpus_list, ow_start_end_words_dict, character_dict)
-importance_of_being_earnest = text_processing.initial_text_processing(9, ow_corpus_list, ow_start_end_words_dict, character_dict)
-reading_gaol = text_processing.initial_text_processing(10, ow_corpus_list, ow_start_end_words_dict, character_dict)
-ideal_husband = text_processing.initial_text_processing(11, ow_corpus_list, ow_start_end_words_dict, character_dict)
+#lord_arthur_saviles_crimes = text_processing.initial_text_processing(0, ow_corpus_list, ow_start_end_words_dict, character_dict)
+#the_happy_prince = text_processing.initial_text_processing(1, ow_corpus_list, ow_start_end_words_dict, character_dict)
+#dorian_grey = text_processing.initial_text_processing(2, ow_corpus_list, ow_start_end_words_dict, character_dict)
+#salome = text_processing.initial_text_processing(3, ow_corpus_list, ow_start_end_words_dict, character_dict)
+#house_of_pomegranates = text_processing.initial_text_processing(4, ow_corpus_list, ow_start_end_words_dict, character_dict)
+#ducchess_of_padua = text_processing.initial_text_processing(5, ow_corpus_list, ow_start_end_words_dict, character_dict)
+#the_soul_under_socialism = text_processing.initial_text_processing(6, ow_corpus_list, ow_start_end_words_dict, character_dict)
+#lady_windermeres_fan = text_processing.initial_text_processing(7, ow_corpus_list, ow_start_end_words_dict, character_dict)
+#a_woman_of_no_importance = text_processing.initial_text_processing(8, ow_corpus_list, ow_start_end_words_dict, character_dict)
+#importance_of_being_earnest = text_processing.initial_text_processing(9, ow_corpus_list, ow_start_end_words_dict, character_dict)
+#reading_gaol = text_processing.initial_text_processing(10, ow_corpus_list, ow_start_end_words_dict, character_dict)
+#ideal_husband = text_processing.initial_text_processing(11, ow_corpus_list, ow_start_end_words_dict, character_dict)
 ```
 
 ## Word Usage
