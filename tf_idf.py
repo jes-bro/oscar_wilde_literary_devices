@@ -7,13 +7,21 @@ import text_processing
 
 
 def calc_word_freq(text_list, num_data_pts):
-    freq_dict = {}
+    word_dict = {}
     for word in text_list:
-        if word in freq_dict:
-            freq_dict[word] += 1
+        if word not in word_dict:
+            word_dict[word] = 1
         else:
-            freq_dict[word] = 1
-    return freq_dict
+            word_dict[word] += 1
+    sorted_keys = sorted(word_dict, key=word_dict.get, reverse=True)
+    values = []
+    for key in sorted_keys:
+        values.append(word_dict[key])
+    most_freq = {}
+    most_freq = dict(zip(sorted_keys, values))
+    most_freq = dict(itertools.islice(most_freq.items(), num_data_pts))
+
+    return most_freq
 
 
 def compute_tf(novel):
@@ -58,7 +66,5 @@ def compute_tf_idf(tf_dict, corpus):
         for novel in corpus:
             if term in novel:
                 novel_occurences += 1
-        tf_idf_dict[term] = frequency * math.log10(
-            len(corpus) / novel_occurences
-        )
+        tf_idf_dict[term] = frequency * math.log10(len(corpus) / novel_occurences)
     return tf_idf_dict

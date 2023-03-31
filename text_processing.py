@@ -58,6 +58,8 @@ def remove_encoding_marks(lowered):
             new_lowered.append(two_words[1])
         else:
             new_lowered.append(word)
+        for _ in range(new_lowered.count("")):
+            new_lowered.remove("")
     return new_lowered[1:]
 
 
@@ -79,11 +81,37 @@ def remove_extra_text(lowered, start_word, end_word):
     commons = []
     with open("commons.csv", "r") as file:
         for line in file:
-            commons.append(line.strip("\n"))
-    for words in enumerate(commons):
+            new_line = line.strip("\n")
+            commons.append(f"{new_line}")
+    for i, words in enumerate(commons):
         for _ in range(new_lowered.count(words)):
             new_lowered.remove(words)
     return new_lowered
+
+
+def remove_commons(lowered):
+    """
+    Remove extra words from a list of words, including project gutenberg
+    starting and endings, and common words.
+
+    Args:
+        lowered (list): A list of words appearing in a text.
+        start_word (string): Word denoting the last word of text to be
+        removed from beginning of list.
+
+    Returns:
+        new_lowered: A list of words with common words and start/end
+        text removed.
+    """
+    commons = []
+    with open("commons.csv", "r") as file:
+        for line in file:
+            new_line = line.strip("\n")
+            commons.append(f"{new_line}")
+    for i, words in enumerate(commons):
+        for _ in range(lowered.count(words)):
+            lowered.remove(words)
+    return lowered
 
 
 def remove_punctuation(new_lowered):
@@ -97,18 +125,25 @@ def remove_punctuation(new_lowered):
         new_lowered: the input argument with punctuation
         marks removed.
     """
+    no_punc = []
     for word in new_lowered:
         if "." in word:
-            word.replace(".", "")
+            word = word.replace(".", "")
         if "," in word:
-            word.replace(",", "")
+            word = word.replace(",", "")
         if '"' in word:
-            word.replace('"', "")
+            word = word.replace('"', "")
         if "!" in word:
-            word.replace("!", "")
+            word = word.replace("!", "")
         if "?" in word:
-            word.replace("?", "")
-    return new_lowered
+            word = word.replace("?", "")
+        if "'" in word:
+            word = word.replace("'", "")
+        if "\x80" in word:
+            continue
+        else:
+            no_punc.append(word)
+    return no_punc
 
 
 def remove_titles(new_lowered):
@@ -181,15 +216,19 @@ def initial_text_processing(num, corpus, start_end_dict, character_dict):
     end_word = start_end_dict[title][1]
     characters = character_dict[title]
 
-    return remove_character_names(
-        remove_titles(
-            remove_punctuation(
-                remove_extra_text(
-                    remove_encoding_marks(get_data_from_book(url, title)),
-                    start_word,
-                    end_word,
+    return remove_punctuation(
+        remove_character_names(
+            remove_titles(
+                remove_commons(
+                    remove_punctuation(
+                        remove_extra_text(
+                            remove_encoding_marks(get_data_from_book(url, title)),
+                            start_word,
+                            end_word,
+                        )
+                    )
                 )
-            )
-        ),
-        characters,
+            ),
+            characters,
+        )
     )
